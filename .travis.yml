@@ -1,0 +1,18 @@
+branches:
+  only:
+  - master
+  - develop
+before_install:
+  - openssl aes-256-cbc -K $encrypted_1fd173b91261_key -iv $encrypted_1fd173b91261_iv -in ci/build_args.encrypted -out ci/build_args -d
+after_success: yarn coverage
+sudo: required
+services:
+  - docker
+language: node_js
+node_js:
+  - "6.5"
+  - "7"
+env:
+  - MARKLOGIC_VERSION=8.0-1
+  - MARKLOGIC_VERSION=8.0-6.4
+  - MARKLOGIC_VERSION=9.0-2

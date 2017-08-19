@@ -1,0 +1,19 @@
+{
+  "buildOnSave": false,
+  "compileOnSave": true,
+  "indentSize": 2,
+  "tabSize": 2,
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "baseUrl": ".",
+    "target": "es2015",
+    "outDir": "../dist",
+    "sourceMap": true,
+    "strict": true
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

@@ -1,0 +1,10 @@
+.vscode
+.nyc_output
+.vagrant
+Vagrantfile
+npm-debug.log
+
+build
+coverage
+dist
+node_modules
