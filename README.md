@@ -1,4 +1,6 @@
 # mldock
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
 > a NodeJS/Typescript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+.
 
 ## Description
