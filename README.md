@@ -3,7 +3,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock.svg)](https://codecov.io/gh/laurelnaiad/mldock)
 [![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
 ---
-> a NodeJS/Typescript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+.
+> a NodeJS/TypeScript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+
 
 ## Description
 
@@ -22,8 +22,7 @@ This is pre-alpha software. The api is entirely unfrozen (8/20/2017). That said,
 
 Prerequisites:
 * NodeJS 6.5+
-* docker-related commands require that the shell in whih they're run is configured for some docker host. Installing Docker for Mac or Docker for Windows, is thus, sufficient.
-* (docker is _not_ needed just to download .rpms.)
+* A Docker host: docker-related functions and the build command require some Docker host. Installing Docker for Mac or Docker for Windows is, thus, sufficient, as would be having access to a remote Docker host. (Docker is _not_ needed just to download .rpms.)
 
 ```bash
 npm install mldock # can be also be global, docker doesn't care
@@ -33,34 +32,35 @@ npm install mldock # can be also be global, docker doesn't care
 
 ## Usage
 
-### The mldock cli:
+### The `mldock` cli:
 
 Download/build image in one step:
 ```bash
 mldock build -r my-ml-proj -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
-# => my-ml-proj-marklogic:8.0.6.4
+#
+# my-ml-proj-marklogic:8.0.6.4
 ```
 
 Or seperately:
 ```bash
 mldock download -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD -d ./downloaded 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
-# => downloading version 8.0-6.4 to ./downloaded  ...done
-# =>
-# => <PWD>/downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm
+# downloading version 8.0-6.4 to ./downloaded  ...done
+#
+# <PWD>/downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm
 
 mldock build -r my-ml-proj -f downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
-# => preparing centos7-compat...done.
-# => building centos7-compat...done.
-# => preparing MarkLogic 8.0-6.4...done.
-# => building MarkLogic 8.0-6.4....done.
-# =>
-# => my-ml-proj-marklogic:8.0.6.4
+# preparing centos7-compat...done.
+# building centos7-compat...done.
+# preparing MarkLogic 8.0-6.4...done.
+# building MarkLogic 8.0-6.4....done.
+#
+# my-ml-proj-marklogic:8.0.6.4
 ```
 
-### The MlDock class:
+### The `MlDock` class:
 
 ```typescript
 import {
@@ -79,8 +79,8 @@ const creds = {
 const mldock = new MlDock({ repo: 'my-ml-proj' })
 mldock.buildVersion('9.0-2', creds).then((imageName) => {
   console.log(`built ${imageName}`)
+  // => built my-ml-proj-marklogic:9.0.2
 })
-// => built my-ml-proj-marklogic:9.0.2
 ```
 
 The workhorse of mldock is MlDockClient, which itself extends [apocas/dockerode](https://github.com/apocas/dockerode). Docker-related options for MlDock are specified as Dockerode options in the 2nd (optional) MlDock constructor parameter.
@@ -90,17 +90,19 @@ import {
   MlDock,
 } from 'mldock'
 
-// instantiate MlDock to operate on `ml-ml-proj` on `my-docker-host` host.
+/* instantiate MlDock to operate on `ml-ml-proj` on `my-docker-host` host. */
 const mldock = new MlDock(
   { repo: 'my-ml-proj' },
   { host: 'my-docker-host', port: 2375 }
 )
 
-// the `.client` property exposes the MlDockClient/Dockerode instance.
+/* the `.client` property exposes the MlDockClient/Dockerode instance. */
 mldock.client.createContainer({
   // ...
 })
-// etc...
+mldock.client.getEvents({
+  // ...
+})
 ```
 
 In order to follow progress of long operations, pass a "progress follower".
@@ -141,14 +143,14 @@ mldock.buildVersion(version, creds, defaultFollower)
     StartPeriod: oneSecondInNano
   }
 })
-.then((container) => mldock.startHostHealth(container.id!, 10, defaultFollower))
-// the server is up and running now.
+.then((container) => mldock.startHostHealthy(container.id!, 10, defaultFollower))
+/* the server is up and running now. */
 .then((container) => mldock.hostInspect(container.id!))
 .then((containerRuntime) => {
   console.log(JSON.stringify(containerRuntime.ports))
-// => print something like the following, where the high port numbers are the
-//      externally mapped ports for the standard marklogic ports
-// => { '8000': 39472, '8001': 38497, '8002': 38434 }
+  // => print something like the following, where the high port numbers are the
+  //      externally mapped ports for the standard marklogic ports
+  // { '8000': 39472, '8001': 38497, '8002': 38434 }
 })
 ```
 
