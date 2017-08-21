@@ -1,7 +1,7 @@
 # mldock
 [![npm](https://img.shields.io/npm/v/mldock.svg)](https://www.npmjs.com/package/mldock)
 [![Travis](https://img.shields.io/travis/laurelnaiad/mldock/master.svg)](https://travis-ci.org/laurelnaiad/mldock)
-[![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock.svg)](https://codecov.io/gh/laurelnaiad/mldock)
+[![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock/master.svg)](https://codecov.io/gh/laurelnaiad/mldock)
 [![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
 ---
 > NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+
