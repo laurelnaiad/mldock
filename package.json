@@ -1,10 +1,10 @@
 {
   "name": "mldock",
-  "description": "a NodeJS/TypeScript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+",
+  "description": "NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+",
   "author": "Daphne Maddox <laurelnaiad@gmail.com>",
   "publisher": "laurelnaiad",
   "license": "MIT",
-  "version": "0.0.0-0",
+  "version": "0.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
@@ -53,7 +53,8 @@
     "clean_build": "shx rm -rf build",
     "clean_cover": "shx rm -rf coverage",
     "clean_dist": "shx rm -rf dist",
-    "prepare_version": "npm version prerelease && npm pack dist"
+    "prepare_dev": "npm version prerelease && npm pack dist",
+    "prepare_publish": "npm version patch && npm pack dist"
   },
   "devDependencies": {
     "@types/chai": "^4.0.3",

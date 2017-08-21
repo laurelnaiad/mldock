@@ -3,6 +3,7 @@
 .vagrant
 Vagrantfile
 npm-debug.log
+yarn-error.log
 
 build
 coverage

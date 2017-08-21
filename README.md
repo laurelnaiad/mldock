@@ -1,9 +1,10 @@
 # mldock
+[![npm](https://img.shields.io/npm/v/mldock.svg)](https://www.npmjs.com/package/mldock)
 [![Travis](https://img.shields.io/travis/laurelnaiad/mldock/master.svg)](https://travis-ci.org/laurelnaiad/mldock)
 [![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock.svg)](https://codecov.io/gh/laurelnaiad/mldock)
 [![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
 ---
-> a NodeJS/TypeScript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+
+> NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+
 
 ## Description
 
@@ -16,7 +17,7 @@ It does very little beyond that, but to allow for substitution of fancier baseli
 
 ## Status
 
-This is pre-alpha software. The api is entirely unfrozen (8/20/2017). That said, this builder is meant to serve as a baseline for other things, and so it may have reached its terminal feature set, give or take some knobs and dials.
+This is alpha software (8/20/2017). The api may change as it gets some use. That said, this builder is meant to serve as a baseline for other things, and so it may have reached its terminal feature set, give or take some polish/knobs and dials.
 
 ## Installation
 
