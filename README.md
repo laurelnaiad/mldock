@@ -22,7 +22,7 @@ Prerequisites:
 * (docker is _not_ needed just to download .rpms.)
 
 ```bash
-npm install mldock # can be also be global
+npm install mldock # can be also be global, docker doesn't care
 ```
 
 `mldock -h` gives help for the command-line interface, and see typings for the barest of library api assistance.
@@ -42,9 +42,17 @@ Or seperately:
 ```bash
 mldock download -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD -d ./downloaded 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
+# => downloading version 8.0-6.4 to ./downloaded  ...done
+# =>
 # => <PWD>/downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm
+
 mldock build -r my-ml-proj -f downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
+# => preparing centos7-compat...done.
+# => building centos7-compat...done.
+# => preparing MarkLogic 8.0-6.4...done.
+# => building MarkLogic 8.0-6.4....done.
+# =>
 # => my-ml-proj-marklogic:8.0.6.4
 ```
 
@@ -68,7 +76,7 @@ const mldock = new MlDock({ repo: 'my-ml-proj' })
 mldock.buildVersion('9.0-2', creds).then((imageName) => {
   console.log(`built ${imageName}`)
 })
-// => installed my-ml-proj-marklogic:9.0.2
+// => built my-ml-proj-marklogic:9.0.2
 ```
 
 The workhorse of mldock is MlDockClient, which itself extends [apocas/dockerode](https://github.com/apocas/dockerode). Docker-related options for MlDock are specified as Dockerode options in the 2nd (optional) MlDock constructor parameter.
