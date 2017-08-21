@@ -25,7 +25,7 @@ export function downloadRpm(
     password: mlDevAcctpassword,
     asset: versionToDownload.downloadUrl
   }
-  progressFollower(`downloading version ${versionToDownload.toString()} to ${intoDirectory}`)
+  progressFollower(`downloading version ${versionToDownload.toString()} to ${intoDirectory}  `)
   return new Promise((resolveDownloaded, reject) => {
     const jar = request.jar()
     progressFollower(undefined, 'logging in')

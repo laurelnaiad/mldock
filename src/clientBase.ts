@@ -115,7 +115,7 @@ export class MlDockClientBase extends Docker {
     },
     progressFollower: ProgressFollower
   ): Promise<DockerResourceId> {
-    const step = 'preparing ' + params.friendlyReference
+    progressFollower('preparing ' + params.friendlyReference
     progressFollower(step)
     fsx.mkdirpSync(params.contextPath)
     return this.writeIgnoreFile(
@@ -133,6 +133,7 @@ export class MlDockClientBase extends Docker {
       if (params.forVersion) {
         labels[`${this.libOptions.domain}.version`] = params.forVersion.toDotString()
       }
+    progressFollower('building ' + params.friendlyReference)
       return this.buildImage(tarred, {
         t: params.imageName,
         buildargs: params.buildargs,
