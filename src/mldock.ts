@@ -186,6 +186,12 @@ export class MlDock extends EventEmitter {
     return this.client.recreateHostContainer(param)
   }
 
+  hostInspect(
+    id: string,
+  ): Promise<ContainerRuntimeRef> {
+    return this.client.hostInspect(id)
+  }
+
   /**
    * Starts a host container and returns the results of inspecting it..
    */
@@ -193,7 +199,7 @@ export class MlDock extends EventEmitter {
     id: string,
   ): Promise<ContainerRuntimeRef> {
     return this.client.getContainer(id).start()
-    .then(() => this.client.hostInspect(id))
+    .then(() => this.hostInspect(id))
   }
 
   /**
