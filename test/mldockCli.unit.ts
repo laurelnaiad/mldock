@@ -103,7 +103,7 @@ describe('mldock cli', function () {
     .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
     .then((ctResult) => {
       ct = ctResult
-      return context.mldock.startHostHealthy(ct.id!, 10, defaultFollower)
+      return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
     })
   })
 
@@ -143,7 +143,7 @@ describe('mldock cli', function () {
       })
     })
 
-    it('should error if bad credentails', function () {
+    it('should error if bad credentials', function () {
       util.speedFactor(this, 8)
       const badCredentials = [
         path.resolve('build/src/cli/cli-download.js'),
