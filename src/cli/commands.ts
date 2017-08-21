@@ -1,6 +1,5 @@
 import * as path from 'path'
 import * as fsx from 'fs-extra'
-const program = require('commander')
 const chalk = require('chalk')
 
 import {
@@ -12,7 +11,7 @@ import { cliFollower } from './progressFollower'
 import * as opts from './opts'
 import * as util from '../util'
 
-function doDownload(version: string, options: {
+function doDownload(program: any, version: string, options: {
   dir?: string,
   email?: string,
   password?: string,
@@ -37,7 +36,7 @@ function doDownload(version: string, options: {
   )
 }
 
-function doBuild(version: string, options: {
+function doBuild(program: any, version: string, options: {
   repo: string,
   rpmFile?: string,
   email?: string,
@@ -62,7 +61,7 @@ function doBuild(version: string, options: {
   )
 }
 
-export function cmdDownload(argv: string[]): Promise<string> {
+export function cmdDownload(program: any, argv: string[]): Promise<string> {
   return new Promise((res, rej) => {
     program
     .option(...opts.downloadDir)
@@ -70,14 +69,14 @@ export function cmdDownload(argv: string[]): Promise<string> {
     .option(...opts.password)
     .option(...opts.overwriteFile)
     .action((...args: any[]) => {
-      doDownload.apply(cmdDownload, args)
+      doDownload.apply(doDownload, [ program, ...args])
       .then(res, rej)
     })
     .parse(argv)
   })
 }
 
-export function cmdBuild(argv: string[]): Promise<string> {
+export function cmdBuild(program: any, argv: string[]): Promise<string> {
   return new Promise((res, rej) => {
     program
     .option(...opts.repo)
@@ -86,7 +85,7 @@ export function cmdBuild(argv: string[]): Promise<string> {
     .option(...opts.password)
     .option(...opts.overwriteImage)
     .action((...args: any[]) => {
-      doBuild.apply(cmdBuild, args)
+      doBuild.apply(doBuild, [ program, ...args ])
       .then(res, rej)
     })
     .parse(argv)

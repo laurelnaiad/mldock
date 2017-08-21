@@ -4,6 +4,7 @@ import * as fsx from 'fs-extra'
 const getPort = require('get-port')
 const ip = require('ip')
 import * as Docker from 'dockerode'
+const { Command } = require('commander')
 
 import * as util from './util.unit'
 import * as cmdFuncs from '../src/cli/commands'
@@ -16,7 +17,7 @@ import {
   defaultFollower
 } from '../src'
 
-module.exports = (dockerContainerId: string) =>
+module.exports = () =>
 describe('mldock cli', function () {
 
   it('builds MarkLogic image from a local rpm file in the docker host', function () {
@@ -25,6 +26,7 @@ describe('mldock cli', function () {
     const {
       mldock, version
     } = util.getContext()
+    const dlCmd = new Command()
     const argvDownload = [
       path.resolve('../src/cli/cli'),
       'download',
@@ -36,6 +38,7 @@ describe('mldock cli', function () {
       process.env.MARKLOGIC_DEV_PASSWORD!,
       version.toString()
     ]
+    dlCmd.parse(argvDownload)
 
     const argvBuildPartial = [
       path.resolve('../src/cli/cli'),
@@ -45,12 +48,16 @@ describe('mldock cli', function () {
       'test-mldock',
       '-f',
     ]
+
     return fsx.remove(util.testDownloadDir)
     .then(() => fsx.mkdirp(util.testDownloadDir))
-    .then(() => cmdFuncs.cmdDownload(argvDownload))
-    .then((filename) => cmdFuncs.cmdBuild(
-      argvBuildPartial.concat([ filename, version.toString() ])
-    ))
+    .then(() => cmdFuncs.cmdDownload(dlCmd, argvDownload))
+    .then((filename) => {
+      const argvBuild = argvBuildPartial.concat([ filename, version.toString() ])
+      const bldCmd = new Command()
+      bldCmd.parse(argvBuild)
+      return cmdFuncs.cmdBuild(bldCmd, argvBuild)
+    })
     .then(() => util.createBasicHost(mldock, version, defaultFollower))
     .then((ct) => {
       return mldock.startHostHealthy(ct.id!, 10, defaultFollower)

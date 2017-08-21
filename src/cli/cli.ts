@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as path from 'path'
 import * as fsx from 'fs-extra'
-const program = require('commander')
+const { Command } = require('commander')
 const chalk = require('chalk')
 import '../util'
 
@@ -14,6 +14,7 @@ function getVersion() {
     return '0.0.0'
   }
 }
+const program = new Command()
 
 program
 .name('mldock')
