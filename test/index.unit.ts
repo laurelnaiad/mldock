@@ -36,7 +36,7 @@ describe('mldock package', function () {
         `the example in the directory as a guide.`
       )
     }
-    util.speedFactor(this, 21)
+    util.speedFactor(this, 34)
     return util.getContext().mldock.removeAll(defaultFollower)
   })
 

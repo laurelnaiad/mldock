@@ -10,7 +10,7 @@
   "bin": {
     "mldock": "cli/cli.js",
     "mldock-download": "cli/cli-download.js",
-    "mldock-install": "cli/cli-install.js"
+    "mldock-build": "cli/cli-build.js"
   },
   "bugs": {
     "url": "https://github.com/laurelnaiad/mldock/issues"
@@ -26,6 +26,7 @@
   "dependencies": {
     "@types/dockerode": "^2.4.5",
     "@types/request": "^2.0.1",
+    "chalk": "^2.1.0",
     "commander": "^2.11.0",
     "dockerode": "^2.5.0",
     "fs-extra": "^4.0.1",
@@ -44,8 +45,9 @@
     "preversion": "npm-run-all test",
     "version": "npm-run-all clean_dist dist",
     "coverage": "node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov && node_modules/.bin/codecov",
-    "test": "shx rm -rf coverage && node_modules/.bin/nyc node_modules/.bin/mocha ./test/index.unit.ts",
+    "test": "npm-run-all clean_cover clean_build build && node_modules/.bin/nyc node_modules/.bin/mocha build/test/index.unit.js",
     "info": "npm-scripts-info",
+    "build": "tsc -p . && shx mkdir -p build/src/dockerFiles && shx cp -R src/dockerFiles/* build/src/dockerFiles/",
     "dist": "tsc -p src && shx mkdir -p dist/dockerFiles && shx cp -R src/dockerFiles/* dist/dockerFiles/ && node scripts/makePackage.js",
     "cleanup": "npm-run-all clean_build clean_cover",
     "clean_build": "shx rm -rf build",
@@ -57,6 +59,7 @@
     "@types/chai": "^4.0.3",
     "@types/fs-extra": "^4.0.0",
     "@types/mocha": "^2.2.41",
+    "@types/sinon": "^2.3.3",
     "chai": "^4.1.1",
     "codecov": "^2.3.0",
     "dotenv": "^4.0.0",
@@ -68,17 +71,14 @@
     "npm-scripts-info": "^0.3.6",
     "nyc": "^11.1.0",
     "shx": "^0.2.2",
+    "sinon": "^3.2.1",
     "source-map-support": "^0.4.16",
-    "ts-node": "^3.3.0",
     "typescript": "^2.4.2"
   },
   "nyc": {
     "timeout": 10000,
-    "extension": [
-      ".ts"
-    ],
     "include": [
-      "**/src/**/*.ts"
+      "**/build/src/**/*.js"
     ],
     "reporter": [
       "text",
@@ -89,10 +89,8 @@
       "**/*.d.ts"
     ],
     "require": [
-      "source-map-support/register",
-      "ts-node/register"
+      "source-map-support/register"
     ],
-    "sourceMap": true,
-    "instrument": true
+    "sourceMap": true
   }
 }

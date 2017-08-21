@@ -5,7 +5,7 @@ export const repo = [
 ]
 export const rpmFile = [
   '-f, --rpmFile <path to rpm file>',
-  'Install the specified MarkLogic .rpm file .',
+  'Build the specified MarkLogic .rpm file into an image.',
 ]
 export const email = [
   '-e, --email <email address>',
@@ -21,7 +21,7 @@ export const overwriteImage = [
 ]
 export const version = [
   '-v, --version <version>',
-  'Version of MarkLogic; tHe version must already be installed in the repository',
+  'Version of MarkLogic; the version must already be present in the repository',
 ]
 export const downloadDir = [
   '-d, --dir <relative directory>',

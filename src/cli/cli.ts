@@ -3,22 +3,23 @@ import * as path from 'path'
 import * as fsx from 'fs-extra'
 const { Command } = require('commander')
 const chalk = require('chalk')
-import '../util'
+
+import { handleNoCommand } from './handlers'
 
 function getVersion() {
-  const p = path.join(process.cwd(), 'package.json')
+  const p = path.resolve(__dirname, '../package.json')
   if (fsx.existsSync(p)) {
     return require(p).version
   }
   else {
-    return '0.0.0'
+    return '<source>'
   }
 }
 const program = new Command()
 
 program
 .name('mldock')
-.description(`Manage docker-based MarkLogic environments. npmjs.com/package/mldock`)
+.description(`Dowload MarkLogic .rpms, build containerized MarkLogic images. npmjs.com/package/mldock`)
 .version(getVersion())
 
 .command(
@@ -29,6 +30,7 @@ program
 .command(
   'build <version>',
   `build the specified MarkLogic Server version.`
-).alias('i')
+).alias('b')
 
 program.parse(process.argv)
+handleNoCommand(program)

@@ -4,7 +4,6 @@ const ip = require('ip')
 import * as Docker from 'dockerode'
 
 import * as util from './util.unit'
-import * as cmdFuncs from '../src/cli/commands'
 import {
   DevCreds,
   MlVersion,
@@ -39,6 +38,8 @@ function testInstall(
   .then((imageInfo) => {
     assert.ok(imageInfo.Id, 'No Id property on inspected image')
   })
+  .then(() => mldock.client.isVersionPresent(version, defaultFollower))
+  .then((isPresent) => expect(isPresent).to.be.true)
   .then(() => util.createBasicHost(mldock, version, defaultFollower))
   .then((ct) => {
     return mldock.startHostHealthy(ct.id!, 30, defaultFollower)

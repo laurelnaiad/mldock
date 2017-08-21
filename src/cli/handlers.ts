@@ -1,10 +1,61 @@
+import * as path from 'path'
+import * as fsx from 'fs-extra'
+const chalk = require('chalk')
 const logUpdate = require('log-update')
+
+import {
+  MlDock,
+  DevCreds,
+  ContainerRuntimeRef
+} from '../index'
+import * as opts from './opts'
+import * as util from '../util'
+
+
+export function handleSuccess(result?: any) {
+  if (result) {
+    console.log(`\n${result.toString().trim()}`)
+  }
+  else {
+    console.log(``)
+  }
+  process.exit()
+}
+
+export function handleError(err: Error | string | number) {
+  if (typeof err === 'string') {
+    console.log(chalk.red(`\nError: ${err}`))
+    process.exit(1)
+  }
+  else {
+    if (typeof err === 'number') {
+      console.log(chalk.red(`\nExit code: ${err.toString()}`))
+      process.exit(err)
+    }
+    else {
+      const errStack: string = <string>err.stack
+      const errLines = errStack.split('\n')
+      console.log(chalk.red(`${errLines[0] + '\n' + errLines.slice(1).join('\n')}`))
+      process.exit(1)
+    }
+  }
+}
 
 function finishPriorStep(currentStep: { step: string | undefined } ) {
   // since we have step, it's beginning of a new step
   if (currentStep.step) {
     logUpdate(`${currentStep.step}...done.`)
     logUpdate.done()
+  }
+}
+
+export function handleNoCommand(program: any) {
+  if (!program.runningCommand) {
+    if (program.args.length) {
+      console.log(chalk.red('No such command: ' + program.args[0]))
+    }
+    program.outputHelp()
+    process.exit(1)
   }
 }
 
