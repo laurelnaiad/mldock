@@ -1,3 +1,7 @@
+[![Travis](https://img.shields.io/travis/laurelnaiad/mldock/master.svg)](https://travis-ci.org/laurelnaiad/mldock)
+[![Coveralls](https://img.shields.io/coveralls/laurelnaiad/mldock.svg)](https://coveralls.io/github/laurelnaiad/mldock)
+[![David](https://img.shields.io/david/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock)
+[![David](https://img.shields.io/david/dev/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock?type=dev)
 # mldock
 > a NodeJS/Typescript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+.
 
@@ -111,6 +115,40 @@ import {
 
 mldock.buildVersion('8.0-6.4', creds, defaultFollower).then((imageName) => {
   //...
+})
+```
+
+There are a few functions on the library to start containers.
+Of particular note may be the `startHostHealthy` function.
+
+The unit tests use this to ensure images are functional.
+
+```typescript
+const version = new MlVersion('8.0-6.4')
+const oneSecondInNano = 1000 * 1000000
+
+mldock.buildVersion(version, creds, defaultFollower)
+.then((imageName) => mldock.createHostContainer({
+  version,
+  healthCheck: {
+    Test: [
+      'CMD-SHELL',
+      `curl --silent --fail http://localhost:8001/admin/v1/timestamp || exit 1`
+    ],
+    Interval: oneSecondInNano,
+    Timeout: oneSecondInNano,
+    Retries: 12,
+    StartPeriod: oneSecondInNano
+  }
+})
+.then((container) => mldock.startHostHealth(container.id!, 10, defaultFollower))
+// the server is up and running now.
+.then((container) => mldock.hostInspect(container.id!))
+.then((containerRuntime) => {
+  console.log(JSON.stringify(containerRuntime.ports))
+// => print something like the following, where the high port numbers are the
+//      externally mapped ports for the standard marklogic ports
+// => { '8000': 39472, '8001': 38497, '8002': 38434 }
 })
 ```
 

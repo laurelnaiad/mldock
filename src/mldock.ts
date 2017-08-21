@@ -55,18 +55,31 @@ export class MlDock extends EventEmitter {
     this.client = new MlDockClient(this.libOptions, dockerOptions)
   }
 
+  /**
+   * Returns the full repo/tag name for MarkLogic version
+   */
   getTagForVersion(version: string | MlVersion) {
     return this.client.getTagForVersion(version)
   }
 
+  /**
+   * Helper function to ensure an instance of MlVersion in overloaded situtations
+   */
   getVersionObject(version: string | MlVersion) {
     return typeof version === 'string' ? new MlVersion(version) : version
   }
 
+  /**
+   * Returns the result of inspecting a MarkLogic image.
+   * @param version
+   */
   inspectVersion(version: string | MlVersion) {
     return this.client.inspectVersion(this.getVersionObject(version))
   }
 
+  /**
+   * Downloads a MarkLogic .rpm file from developer.marklogic.com.
+   */
   downloadVersion(
     version: string | MlVersion,
     targetDirectory: string,
@@ -104,11 +117,6 @@ export class MlDock extends EventEmitter {
   /**
    * Builds a specific version of MarkLogic as an image in the configured docker
    * repository.
-   *
-   * The MarkLogic image is stacked on a CentOS image which is pulled from the Docker
-   * repository. The image is left in a state where the MarkLogic Server is
-   * _initialized_, but not _bootstrapped_. This puts containers based on the image
-   * in position to either join a cluster or to be the first host of a cluster.
    */
   buildVersion(
     version: string | MlVersion,
@@ -136,6 +144,9 @@ export class MlDock extends EventEmitter {
     })
   }
 
+  /**
+   * Stops & removes all containers using a version images, then removes the version image.
+   */
   removeVersion(
     version: string | MlVersion,
     progressFollower?: ProgressFollower
@@ -145,6 +156,10 @@ export class MlDock extends EventEmitter {
     return this.client.removeMlDockResources(versionObj, progressFollower)
   }
 
+  /**
+   * Stops & removes all containers using mldock images, then the containers and images.
+   * Does not remove base images.
+   */
   removeAll(
     progressFollower?: ProgressFollower
   ): Promise<void> {
@@ -152,6 +167,9 @@ export class MlDock extends EventEmitter {
     return this.client.removeMlDockResources(undefined, progressFollower)
   }
 
+  /**
+   * Creates a basic container host container.
+   */
   createHostContainer(options: {
     version: MlVersion,
     containerName?: string,
@@ -168,6 +186,9 @@ export class MlDock extends EventEmitter {
     return this.client.recreateHostContainer(param)
   }
 
+  /**
+   * Starts a host container and returns the results of inspecting it..
+   */
   startHost(
     id: string,
   ): Promise<ContainerRuntimeRef> {
@@ -175,6 +196,9 @@ export class MlDock extends EventEmitter {
     .then(() => this.client.hostInspect(id))
   }
 
+  /**
+   * Starts a host container and waits for it to emit a healthy event.
+   */
   startHostHealthy(
     id: string,
     timeoutSeconds: number,
