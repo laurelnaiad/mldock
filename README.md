@@ -1,18 +1,18 @@
+# mldock
 [![Travis](https://img.shields.io/travis/laurelnaiad/mldock/master.svg)](https://travis-ci.org/laurelnaiad/mldock)
 [![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock.svg)](https://codecov.io/gh/laurelnaiad/mldock)
-[![David](https://img.shields.io/david/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock)
-[![David](https://img.shields.io/david/dev/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock?type=dev)
-# mldock
+[![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
+---
 > a NodeJS/Typescript library and cli to download MarkLogic rpms and build docker images hosting MarkLogic Server 8+.
 
 ## Description
 
-mldock is intended to create images to serve as a baselines for building more interesting and useful MarkLogic-hosting docker containers. As such, it does two things:
+mldock:
 
-* it downloads MarkLogic rpms from MarkLogic using the developer credentials you bring;
-* it builds images that run MarkLogic.
+* downloads MarkLogic .rpm files from MarkLogic using the developer credentials you bring;
+* builds Docker images that run MarkLogic Server.
 
-It does very little beyond that, but to allow for to substitution of fancier baselines _underneath_ the MarkLogic image.
+It does very little beyond that, but to allow for substitution of fancier baselines _underneath_ the MarkLogic image.
 
 ## Status
 
