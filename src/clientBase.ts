@@ -81,18 +81,12 @@ export class MlDockClientBase extends Docker {
     .then(() => this.createContainer(param))
   }
 
-  protected writeIgnoreFile(directory: string, myFiles: string[]) {
-    const files = fsx.readdirSync(directory)
-      .filter(f => {
-        return !!!myFiles.find(myF => myF === f) &&
-            !(f === '.dockerignore' || f === 'Dockerfile')
-      })
-      .join('\n') + '\n'
-    return fsx.writeFile(
-      path.join(directory, '.dockerignore'),
-      files,
-      { encoding: 'utf8' }
-    )
+  protected getIngoredFiles(directory: string, myFiles: string[]) {
+    return fsx.readdirSync(directory)
+    .filter(f => {
+      return !!!myFiles.find(myF => myF === f) &&
+          !(f === '.dockerignore' || f === 'Dockerfile')
+    })
   }
 
   /**
@@ -115,30 +109,27 @@ export class MlDockClientBase extends Docker {
     },
     progressFollower: ProgressFollower
   ): Promise<DockerResourceId> {
-    progressFollower('preparing ' + params.friendlyReference
-    progressFollower(step)
+    progressFollower('preparing ' + params.friendlyReference)
     fsx.mkdirpSync(params.contextPath)
-    return this.writeIgnoreFile(
+    const ignoredFiles = this.getIngoredFiles(
       params.contextPath,
       params.files || []
     )
-    .then(() => {
-      const step = 'building ' + params.friendlyReference
-      progressFollower(step)
-      const tarred = tar.pack(params.contextPath)
-      const labels = {
-        [`${this.libOptions.domain}`]: '',
-        [`${this.libOptions.domain}.repo`]: this.libOptions.repo,
-      }
-      if (params.forVersion) {
-        labels[`${this.libOptions.domain}.version`] = params.forVersion.toDotString()
-      }
+    const tarred = tar.pack(params.contextPath, {
+      ignore: (name: string) => !!ignoredFiles.find(f => !!path.basename(name).match(f))
+    })
+    const labels = {
+      [`${this.libOptions.domain}`]: '',
+      [`${this.libOptions.domain}.repo`]: this.libOptions.repo,
+    }
+    if (params.forVersion) {
+      labels[`${this.libOptions.domain}.version`] = params.forVersion.toDotString()
+    }
     progressFollower('building ' + params.friendlyReference)
-      return this.buildImage(tarred, {
-        t: params.imageName,
-        buildargs: params.buildargs,
-        labels
-      })
+    return this.buildImage(tarred, {
+      t: params.imageName,
+      buildargs: params.buildargs,
+      labels
     })
     .then((stream) => progressToLogLines(stream, (line) => progressFollower(undefined, line)))
   }
