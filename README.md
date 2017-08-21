@@ -1,5 +1,5 @@
 [![Travis](https://img.shields.io/travis/laurelnaiad/mldock/master.svg)](https://travis-ci.org/laurelnaiad/mldock)
-[![Coveralls](https://img.shields.io/coveralls/laurelnaiad/mldock.svg)](https://coveralls.io/github/laurelnaiad/mldock)
+[![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock.svg)](https://codecov.io/gh/laurelnaiad/mldock)
 [![David](https://img.shields.io/david/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock)
 [![David](https://img.shields.io/david/dev/laurelnaiad/mldock.svg)](https://david-dm.org/laurelnaiad/mldock?type=dev)
 # mldock
