@@ -35,6 +35,12 @@ export function downloadRpm(
       form,
       jar
     }, (err, reqRes, body) => {
+      if (body) {
+        const bodyObj = JSON.parse(body)
+        if (bodyObj.status && bodyObj.status !== 'ok') {
+          return reject(new Error(body))
+        }
+      }
       if (err) {
         return reject(err)
       }
