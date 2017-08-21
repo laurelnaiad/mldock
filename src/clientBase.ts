@@ -149,8 +149,7 @@ export class MlDockClientBase extends Docker {
     id: string,
     progressFollower: ProgressFollower
   ) {
-    const step = `removing container ${id} and its dependencies`
-    progressFollower(step)
+    progressFollower(`removing container ${id}`)
     const cont = this.getContainer(id)
     return cont.inspect().then(inspect => {
       if (inspect.State.Running) {
@@ -161,63 +160,16 @@ export class MlDockClientBase extends Docker {
         return cont.remove()
       }
     }, (err) => this.handleError404Ok(err))
+    .then(() => progressFollower(undefined))
   }
 
   protected wipeMarkLogicImage(
     id: string,
     progressFollower: ProgressFollower
   ): Promise<any> {
-    const step = `removing image ${id} and its dependencies`
-    progressFollower(step)
-    return this.getDependentImages(id)
-    .then(deps => {
-      return repeatUntilEmpty(deps, (dep) => {
-        const img = this.getImage(id)
-        return img.inspect().then(
-          inspect => img.remove()
-          .then(res => res, err => {
-            if (err.statusCode === 409) {
-              deps.push(dep)
-            }
-            else {
-              throw err
-            }
-          }),
-          (err) => this.handleError404Ok(err)
-        )
-      })
-    })
-  }
-
-  protected getDependentImages(id: string) {
-    function listLen(depsMap: HashMap<string>, depId: string) {
-      let i = 0
-
-      while (depsMap[depId]) {
-        depId = depsMap[depId]
-        i++
-      }
-      return i
-    }
-
-    return this.listImages({
-      since: id
-    })
-    .then((dependents) => {
-      const depsMap = dependents.reduce<HashMap<string>>((acc, d) => {
-        return Object.assign(acc, { [d.ParentId]: d.Id })
-      }, {})
-      return dependents.sort((a, b) => {
-        if (depsMap[a.Id] === b.Id) {
-          return -1
-        }
-        if (depsMap[b.Id] === a.Id) {
-          return 1
-        }
-        const aLen = listLen(depsMap, a.Id)
-        const bLen = listLen(depsMap, b.Id)
-        return aLen - bLen
-      })
-    })
+    progressFollower(`removing image ${id}`)
+    const img = this.getImage(id)
+    return img.remove()
+    .then(() => progressFollower(undefined))
   }
 }
