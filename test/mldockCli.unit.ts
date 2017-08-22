@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import { expect, assert } from 'chai'
 import * as fsx from 'fs-extra'
 import * as Docker from 'dockerode'
+const { Command } = require('commander')
 import * as sinon from 'sinon'
 
 import * as handlers from '../src/cli/handlers'
@@ -58,6 +59,12 @@ module.exports = () =>
 describe('mldock cli', function () {
   let context: util.TestContext
 
+  function errorHandlerStub(expectFunc: Function) {
+    return sandbox.stub(handlers, 'handleError').callsFake((
+      err: Error | string | number
+    ) => expectFunc(err))
+  }
+
   before(function () {
     context = util.getContext()
   })
@@ -66,50 +73,11 @@ describe('mldock cli', function () {
     return context.mldock.removeVersion(context.version)
   })
 
-  it('builds MarkLogic image from a local rpm file in the docker host', function () {
-    util.speedFactor(this, 987)
+  let sandbox: sinon.SinonSandbox
+  let ehStub: sinon.SinonStub
+  sandbox = sinon.sandbox.create()
 
-    const downloadArgs = [
-      'download',
-      '-d',
-      util.testDownloadDir,
-      '-e',
-      process.env.MARKLOGIC_DEV_EMAIL!,
-      '-p',
-      process.env.MARKLOGIC_DEV_PASSWORD!,
-      '-o',
-      context.version.toString()
-    ]
-    const buildArgs = [
-      'build',
-      '-o',
-      '-r',
-      'test-mldock',
-      '-f',
-      path.join(util.testDownloadDir, context.version.downloadUrl.match(/([^\/]+)$/)![1]),
-      context.version.toString()
-    ]
-    return fsx.remove(util.testDownloadDir)
-    .then(() => fsx.mkdirp(util.testDownloadDir))
-    .then(() => runCli(downloadArgs))
-    .then(() => runCli(buildArgs))
-    .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
-    .then((ct) => {
-      return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
-      .then(() => context.mldock.removeAll())
-    })
-  })
-
-  describe('params parsing', function () {
-    function errorHandlerStub(expectFunc: Function) {
-      return sandbox.stub(handlers, 'handleError').callsFake((
-        err: Error | string | number
-      ) => expectFunc(err))
-    }
-
-    let sandbox: sinon.SinonSandbox
-    let ehStub: sinon.SinonStub
-    sandbox = sinon.sandbox.create()
+  describe('cli download/build', function () {
     beforeEach(function () {
       ehStub = errorHandlerStub((err: Error) => { throw err })
     })
@@ -117,7 +85,42 @@ describe('mldock cli', function () {
       sandbox.restore()
     })
 
+    it('builds MarkLogic image from a local rpm file in the docker host', function () {
+      util.speedFactor(this, 987)
+
+      const downloadArgs = [
+        'download',
+        '-d',
+        util.testDownloadDir,
+        '-e',
+        process.env.MARKLOGIC_DEV_EMAIL!,
+        '-p',
+        process.env.MARKLOGIC_DEV_PASSWORD!,
+        '-o',
+        context.version.toString()
+      ]
+      const buildArgs = [
+        'build',
+        '-o',
+        '-r',
+        'test-mldock',
+        '-f',
+        path.join(util.testDownloadDir, context.version.downloadUrl.match(/([^\/]+)$/)![1]),
+        context.version.toString()
+      ]
+      return fsx.remove(util.testDownloadDir)
+      .then(() => fsx.mkdirp(util.testDownloadDir))
+      .then(() => runCli(downloadArgs))
+      .then(() => runCli(buildArgs))
+      .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
+      .then((ct) => {
+        return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
+        .then(() => context.mldock.removeAll())
+      })
+    })
+
     it('download should error if try overwrite w/out option', function () {
+      util.speedFactor(this, 8)
       const missingEmailParams = [
         path.resolve('build/src/cli/cli-download.js'),
         'download',
@@ -137,7 +140,15 @@ describe('mldock cli', function () {
         expect(ehStub.firstCall.args[0].toString()).to.match(/Cannot overwrite/)
       })
     })
+  })
 
+  describe('params parsing', function () {
+    beforeEach(function () {
+      ehStub = errorHandlerStub((err: Error) => { throw err })
+    })
+    afterEach(function () {
+      sandbox.restore()
+    })
     it('download should error if missing email', function () {
       const missingEmailParams = [
         path.resolve('build/src/cli/cli-download.js'),
@@ -212,6 +223,25 @@ describe('mldock cli', function () {
         assert(false, 'should error running program with bad args')
       }, (err) => {
         expect(err.message).to.match(/File not found/)
+      })
+    })
+
+    describe('error handlers', function () {
+      it('process exits on error', function () {
+        util.speedFactor(this, 8)
+        return runCli(['download', '-adsfaf', 'notwork'])
+        .then(
+          () => assert(false, 'should error on no args'),
+          (err) => {}
+        )
+      })
+      it('handles bad command', function () {
+        util.speedFactor(this, 8)
+        return runCli(['notacommand'])
+        .then(
+          () => assert(false, 'should error on no args'),
+          (err) => {}
+        )
       })
     })
   })

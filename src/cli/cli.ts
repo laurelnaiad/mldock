@@ -8,6 +8,7 @@ import { handleNoCommand } from './handlers'
 
 function getVersion() {
   const p = path.resolve(__dirname, '../package.json')
+  /* istanbul ignore if */
   if (fsx.existsSync(p)) {
     return require(p).version
   }

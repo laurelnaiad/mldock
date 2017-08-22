@@ -227,20 +227,16 @@ export class MlDockClient extends MlDockClientBase {
       filters.label.push(`${this.libOptions.domain}.version=${version.toDotString()}`)
     }
     return this.listImages({ filters })
-    .then(images => {
-      return repeatUntilEmpty(images, (image) => {
-        const filters = {
-          ancestor: [ image.Id.match(/([^\:]*)$/)![1] ]
-        }
-        return this.listContainers({ filters, all: true })
-        .then(containers => {
-          return repeatUntilEmpty(containers, (container) => {
-            return this.wipeMarkLogicContainer(container.Id, progressFollower)
-          })
-        })
-        .then(() => this.wipeMarkLogicImage(image.Id, progressFollower))
+    .then(images => repeatUntilEmpty(images, (image) => {
+      return this.listContainers({
+        all: true,
+        filters: { ancestor: [ image.Id.match(/([^\:]*)$/)![1] ] }
       })
-    })
+      .then(containers => repeatUntilEmpty(containers, (container) => {
+        return this.wipeMarkLogicContainer(container.Id, progressFollower)
+      }))
+      .then(() => this.wipeMarkLogicImage(image.Id, progressFollower))
+    }))
     .then(() => this.pruneImages())
     .then(() => progressFollower(undefined))
   }

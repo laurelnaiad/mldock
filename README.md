@@ -23,7 +23,8 @@ This is alpha software (8/20/2017). The api may change as it gets some use. That
 
 Prerequisites:
 * NodeJS 6.5+
-* A Docker host: docker-related functions and the build command require some Docker host. Installing Docker for Mac or Docker for Windows is, thus, sufficient, as would be having access to a remote Docker host. (Docker is _not_ needed just to download .rpms.)
+* Docker Engine 17.06+
+* a free [MarkLogic Developer Account](https://developer.marklogic.com/people/signup)
 
 ```bash
 npm install mldock # can be also be global, docker doesn't care

@@ -17,8 +17,8 @@ let myLibs: any[] = [
 myLibs.forEach((lib, i) => (myLibs[i] = require(lib)))
 
 /**
- * Trouble ensues on travis if a download is attempted while there'
- * s already an installed version. Stpes need to remove their
+ * Trouble ensues on travis if a download is attempted while there's
+ * already an installed version. Steps need to remove their
  * version to make room for subsequent installs, or they
  * need to continue with existing version
  */

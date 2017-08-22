@@ -17,23 +17,11 @@ export function handleSuccess(result: any) {
   process.exit()
 }
 
-export function handleError(err: Error | string | number) {
-  if (typeof err === 'string') {
-    console.log(chalk.red(`\nError: ${err}`))
-    process.exit(1)
-  }
-  else {
-    if (typeof err === 'number') {
-      console.log(chalk.red(`\nExit code: ${err.toString()}`))
-      process.exit(err)
-    }
-    else {
-      const errStack: string = <string>err.stack
-      const errLines = errStack.split('\n')
-      console.log(chalk.red(`${errLines[0] + '\n' + errLines.slice(1).join('\n')}`))
-      process.exit(1)
-    }
-  }
+export function handleError(err: Error) {
+  const errStack: string = <string>err.stack
+  const errLines = errStack.split('\n')
+  console.log(chalk.red(`${errLines[0] + '\n' + errLines.slice(1).join('\n')}`))
+  process.exit(1)
 }
 
 function finishPriorStep(currentStep: { step: string | undefined } ) {
