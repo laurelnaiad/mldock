@@ -43,15 +43,13 @@ export class MlVersion {
   toString() {
     return `${this.major}.${this.minor}-${this.revision}` + (this.patch ? `.${this.patch}` : '')
   }
-  toSafeString() {
-    return this.toString().replace(/(\.|-)/g, '_')
-  }
   toDotString() {
     return this.toString().replace(/(-)/g, '.')
   }
   get downloadUrl(): string {
     const baseUrl = `https://developer.marklogic.com/download/binaries/${this.major}.${this.minor}/MarkLogic`
     if (this.major < 9) {
+      /* istanbul ignore else */ // the 8.1 case
       if (this.minor < 1) {
         if (this.revision < 5) {
           return `${baseUrl}-${this.toString()}.x86_64.rpm`
@@ -61,7 +59,8 @@ export class MlVersion {
         }
       }
       else {
-          return `${baseUrl}-RHEL7-${this.toString()}.x86_64.rpm`
+        // in case there's an 8.1
+        return `${baseUrl}-RHEL7-${this.toString()}.x86_64.rpm`
       }
     }
     else {

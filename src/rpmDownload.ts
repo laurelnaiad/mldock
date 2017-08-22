@@ -2,7 +2,6 @@ import * as crypto from 'crypto'
 import * as path from 'path'
 import * as fsx from 'fs-extra'
 import { createWriteStream } from 'fs'
-import { EventEmitter } from 'events'
 import * as got from 'got'
 import * as tough from 'tough-cookie'
 const through2 = require('through2')
@@ -56,11 +55,9 @@ export function downloadRpm(
     if (resp.statusCode && resp.statusCode > 299) {
       throw new Error(`Got non-success trying to login: ${resp.statusCode}: ${resp.statusMessage}`)
     }
-    if (resp.body) {
-      const bodyObj = JSON.parse(resp.body)
-      if (bodyObj.status && bodyObj.status !== 'ok') {
-        throw new Error(resp.body)
-      }
+    const bodyObj = JSON.parse(resp.body)
+    if (bodyObj.status && bodyObj.status !== 'ok') {
+      throw new Error(resp.body)
     }
     cookie = tough.Cookie.parse(resp.headers['set-cookie'][0])!
     progressFollower(undefined, 'getting download uri')
@@ -102,8 +99,7 @@ export function downloadRpm(
         .on('downloadProgress', (state: { percent: number }) => {
           progressFollower(undefined, Math.round(state.percent * 100) + '%' )
         })
-        /* istanbul ignore next */
-        .on('error', (err: Error) => {
+        .on('error',  /* istanbul ignore next */ (err: Error) => {
           rej(new Error(`Errored trying to download the .rpm file: ${err.stack}`))
         })
         .pipe(createWriteStream(filename))
