@@ -49,6 +49,10 @@ export function progressToLogLines(
             line = line.trim()
             const matchesSha = line.match(/^sha\:(.*)/)
             if (matchesSha) {
+              /**
+               * to be tested. this condition was last noted while
+               * overwriting an image, if memory serves
+               */
               id = matchesSha[1]
             }
           })

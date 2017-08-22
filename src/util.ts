@@ -11,6 +11,7 @@ export function repeatUntilEmpty<R>(
         f(iteratee.shift()!)
         .then(
           (res) => loop(),
+          /* istanbul ignore next */
           (err: Error) => rej(err)
         )
       }

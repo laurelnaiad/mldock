@@ -49,8 +49,7 @@ describe('mldock package', function () {
   myLibs.forEach(lib => lib())
 
   after(function () {
-    const mld = util.getContext().mldock
     util.speedFactor(this, 34)
-    return mld.removeVersion(version, defaultFollower)
+    return util.getContext().mldock.removeAll(defaultFollower)
   })
 })
