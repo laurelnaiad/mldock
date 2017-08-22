@@ -77,6 +77,7 @@ describe('mldock cli', function () {
       process.env.MARKLOGIC_DEV_EMAIL!,
       '-p',
       process.env.MARKLOGIC_DEV_PASSWORD!,
+      '-o',
       context.version.toString()
     ]
     const buildArgs = [
@@ -114,6 +115,27 @@ describe('mldock cli', function () {
     })
     afterEach(function () {
       sandbox.restore()
+    })
+
+    it('download should error if try overwrite w/out option', function () {
+      const missingEmailParams = [
+        path.resolve('build/src/cli/cli-download.js'),
+        'download',
+        '-d',
+        util.testDownloadDir,
+        '-e',
+        process.env.MARKLOGIC_DEV_EMAIL!,
+        '-p',
+        process.env.MARKLOGIC_DEV_PASSWORD!,
+        context.version.toString()
+      ]
+      return downloadCli.runProgram(missingEmailParams)
+      .then(() => {
+        assert(false, 'should error running program with bad args')
+      }, (err) => {
+        expect(ehStub.callCount).to.equal(1)
+        expect(ehStub.firstCall.args[0].toString()).to.match(/Cannot overwrite/)
+      })
     })
 
     it('download should error if missing email', function () {

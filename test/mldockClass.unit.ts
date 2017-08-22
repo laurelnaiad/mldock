@@ -65,6 +65,16 @@ function testInstall(
   })
   .then(() => mldock.client.isVersionPresent(version, defaultFollower))
   .then((isPresent) => expect(isPresent).to.be.true)
+  .then(() => mldock.buildVersion(
+    version,
+    source,
+    false, // <= don't overwrite
+    defaultFollower,
+  ))
+  .then(
+    () => assert(false, 'Should error trying to overwrite if not opted in'),
+    (err) => {}
+  )
   .then(() => util.createBasicHost(mldock, version, defaultFollower))
   .then((ct) => {
     return mldock.startHostHealthy(ct.id!, 30, defaultFollower)

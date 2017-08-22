@@ -46,7 +46,7 @@
     "preversion": "npm-run-all test",
     "version": "npm-run-all clean_dist dist",
     "coverage": "node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov && node_modules/.bin/codecov",
-    "test": "npm-run-all clean_cover clean_build build && node_modules/.bin/nyc node_modules/.bin/mocha build/test/index.unit.js",
+    "test": "npm-run-all clean_build build && node_modules/.bin/nyc node_modules/.bin/mocha build/test/index.unit.js",
     "info": "npm-scripts-info",
     "build": "tsc -p . && shx mkdir -p build/src/dockerFiles && shx cp -R src/dockerFiles/* build/src/dockerFiles/",
     "dist": "tsc -p src && shx mkdir -p dist/dockerFiles && shx cp -R src/dockerFiles/* dist/dockerFiles/ && node scripts/makePackage.js",

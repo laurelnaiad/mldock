@@ -16,18 +16,18 @@ export interface DevCreds {
   password: string
 }
 
-function getHasher(hash: crypto.Hash) {
-  return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
-    const buffer = Buffer.isBuffer(data) ?
-        data :
-        new Buffer(data, enc)
-    hash.update(buffer)
-    this.push(data)
-    cb()
-  }, function(cb: Function) {
-    cb()
-  })
-}
+// function getHasher(hash: crypto.Hash) {
+//   return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
+//     const buffer = Buffer.isBuffer(data) ?
+//         data :
+//         new Buffer(data, enc)
+//     hash.update(buffer)
+//     this.push(data)
+//     cb()
+//   }, function(cb: Function) {
+//     cb()
+//   })
+// }
 
 export function downloadRpm(
   intoDirectory: string,
@@ -52,6 +52,7 @@ export function downloadRpm(
     form: true,
     body: form
   }).then((resp) => {
+    /* istanbul ignore next */
     if (resp.statusCode && resp.statusCode > 299) {
       throw new Error(`Got non-success trying to login: ${resp.statusCode}: ${resp.statusMessage}`)
     }
@@ -74,6 +75,7 @@ export function downloadRpm(
         body: { download: versionToDownload.downloadUrl },
       })
       .then((resp) => {
+        /* istanbul ignore next */
         if (resp.statusCode &&  resp.statusCode > 299) {
           throw new Error(`Got non-success trying to get download url: ${resp.statusMessage}: ${resp.statusMessage}`)
         }
@@ -100,6 +102,7 @@ export function downloadRpm(
         .on('downloadProgress', (state: { percent: number }) => {
           progressFollower(undefined, Math.round(state.percent * 100) + '%' )
         })
+        /* istanbul ignore next */
         .on('error', (err: Error) => {
           rej(new Error(`Errored trying to download the .rpm file: ${err.stack}`))
         })

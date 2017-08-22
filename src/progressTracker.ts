@@ -31,9 +31,7 @@ export function progressToLogLines(
   }
   return new Promise((res, rej) => {
     const rootListener = (evt: any) => {
-      if (!(evt instanceof Object)) {
-        return
-      }
+      /* istanbul ignore if */
       if (evt.error) {
         removeMyListeners()
         if (evt.error instanceof Error) {
@@ -63,6 +61,7 @@ export function progressToLogLines(
         }
       }
     }
+    /* istanbul ignore next */
     const errorListener = (err: any) => {
       removeMyListeners()
       if (err instanceof Error) {
@@ -74,6 +73,8 @@ export function progressToLogLines(
     }
     const endListener = (thing1: string, otherthing: string) => {
       removeMyListeners()
+
+      /* istanbul ignore if */
       if (!id) {
         rej(new Error('Build stream ended without an id.'))
       }

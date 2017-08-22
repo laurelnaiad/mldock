@@ -2,7 +2,8 @@ import * as Docker from 'dockerode'
 import {
   MlVersion,
   MlDock,
-  ProgressFollower
+  ProgressFollower,
+  getDefaults
 } from '../src'
 
 export const testDownloadDir = 'build/test/rpmDownload'
@@ -18,7 +19,9 @@ export interface TestContext {
 }
 export function getContext(): TestContext {
   return {
-    mldock: new MlDock({ repo: 'test-mldock' }),
+    mldock: new MlDock(
+      Object.assign({}, getDefaults(), { repo: 'test-mldock' })
+    ),
     version: new MlVersion(process.env.MARKLOGIC_VERSION!)
   }
 }

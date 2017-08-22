@@ -12,13 +12,8 @@ import * as opts from './opts'
 import * as util from '../util'
 
 
-export function handleSuccess(result?: any) {
-  if (result) {
-    console.log(`\n${result.toString().trim()}`)
-  }
-  else {
-    console.log(``)
-  }
+export function handleSuccess(result: any) {
+  console.log(`\n${result.toString().trim()}`)
   process.exit()
 }
 
@@ -72,31 +67,25 @@ export function cliFollower(
     // use the first line with text
     message = message.trim().split('\n')[0]
   }
-  if (step && message) {
+  if (step) {
     finishPriorStep(currentStep)
-    logUpdate(`${step}...${message}`)
+    logUpdate(`${step}...${message || ''}`)
     currentStep.step = step
   }
   else {
-    if (step) {
-      finishPriorStep(currentStep)
-      logUpdate(`${step}...`)
-      currentStep.step = step
-    }
-    else {
-      if (message) {
-        if (currentStep.step) {
-          logUpdate(`${currentStep.step}...${message}`)
-        }
-        else {
-          // technically, this should be done to us by the library, but..
-          logUpdate(`...${message}`)
-        }
+    if (message) {
+      if (currentStep.step) {
+        logUpdate(`${currentStep.step}...${message}`)
       }
       else {
-        finishPriorStep(currentStep)
-        currentStep.step = undefined
+        // technically, this should not be done to us by the library, but..
+        /* istanbul ignore next */
+        logUpdate(`...${message}`)
       }
+    }
+    else {
+      finishPriorStep(currentStep)
+      currentStep.step = undefined
     }
   }
 }
