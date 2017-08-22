@@ -1,6 +1,4 @@
 import { expect, assert } from 'chai'
-const getPort = require('get-port')
-const ip = require('ip')
 import * as Docker from 'dockerode'
 
 import * as util from './util.unit'
@@ -76,6 +74,11 @@ function testInstall(
 
 module.exports = () =>
 describe('MlDock class', function () {
+  it('tranlates versions to tags', function () {
+    const tforF = util.getContext().mldock.getTagForVersion('9.0-1')
+    expect(tforF).to.equal(`test-mldock-marklogic:9.0.1`)
+  })
+
   it('download and builds MarkLgic image in the docker host', function () {
     util.speedFactor(this, 987)
 
