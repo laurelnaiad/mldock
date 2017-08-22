@@ -16,6 +16,12 @@ let myLibs: any[] = [
 ]
 myLibs.forEach((lib, i) => (myLibs[i] = require(lib)))
 
+/**
+ * Trouble ensues on travis if a download is attempted while there'
+ * s already an installed version. Stpes need to remove their
+ * version to make room for subsequent installs, or they
+ * need to continue with existing version
+ */
 describe('mldock package', function () {
   let mld: MlDock
   let version: MlVersion
@@ -44,8 +50,7 @@ describe('mldock package', function () {
 
   after(function () {
     const mld = util.getContext().mldock
-    util.speedFactor(this, 21)
+    util.speedFactor(this, 34)
     return mld.removeVersion(version, defaultFollower)
-    .then(() => mld.client.pruneImages())
   })
 })

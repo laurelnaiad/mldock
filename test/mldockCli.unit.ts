@@ -58,20 +58,13 @@ function stubDownload(sb: sinon.SinonSandbox, stub: (
 module.exports = () =>
 describe('mldock cli', function () {
   let context: util.TestContext
-  let ct: Docker.Container
 
   before(function () {
     context = util.getContext()
   })
 
   after(function () {
-    if (ct) {
-      return ct.kill()
-      .then(() => ct.remove())
-    }
-    else {
-      return Promise.resolve()
-    }
+    return context.mldock.removeVersion(context.version)
   })
 
   it('builds MarkLogic image from a local rpm file in the docker host', function () {
@@ -101,9 +94,9 @@ describe('mldock cli', function () {
     .then(() => runCli(downloadArgs))
     .then(() => runCli(buildArgs))
     .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
-    .then((ctResult) => {
-      ct = ctResult
+    .then((ct) => {
       return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
+      .then(() => context.mldock.removeAll())
     })
   })
 

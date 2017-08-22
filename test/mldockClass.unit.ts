@@ -13,6 +13,33 @@ import {
   defaultFollower
 } from '../src'
 
+function testLiveHostAndRemoveSafely(
+  mldock: MlDock,
+  ct: Docker.Container,
+  version: MlVersion
+) {
+  return mldock.hostInspect(ct.id!)
+  .then((ctRuntime) => {
+    expect(parseInt(ctRuntime.ports[8001])).to.be.greaterThan(10000)
+
+    return ct.kill()
+    .then(() => ct.remove())
+    .then(() => mldock.removeVersion(version))
+    .then(() => mldock.inspectVersion(version))
+    .then(
+      (imageInfo) => assert(
+        false,
+        'Expected to error inspecting an uninstalled version.'
+      ),
+      (err) => {
+        if (err.statusCode !== 404) {
+          throw err
+        }
+      }
+    )
+  })
+}
+
 function testInstall(
   mldock: MlDock,
   source: string | DevCreds,
@@ -43,24 +70,7 @@ function testInstall(
   .then(() => util.createBasicHost(mldock, version, defaultFollower))
   .then((ct) => {
     return mldock.startHostHealthy(ct.id!, 30, defaultFollower)
-    .then(
-      (resp) => {
-        return ct.kill()
-        .then(() => ct.remove())
-        .then(() => mldock.removeVersion(version))
-        .then(() => mldock.inspectVersion(version))
-        .then(
-          (imageInfo) => assert(false, 'Expected to error inspecting an uninstalled version.'),
-          (err) => {
-            if (err.statusCode !== 404) {
-              throw err
-            }
-          }
-        )
-        .then(() => assert(true))
-      },
-      (err) => assert(false, err.stack)
-    )
+    .then((ct) => testLiveHostAndRemoveSafely(mldock, ct, version))
   })
 }
 
@@ -80,8 +90,10 @@ describe('MlDock class', function () {
   })
 
   after(function () {
-    // this is a breather in a nod to a struggling laptop
     util.speedFactor(this, 8)
-    return new Promise((res) => setTimeout(() => res(), 2000))
+    const ctx = util.getContext()
+    return ctx.mldock.removeVersion(ctx.version, defaultFollower)
+    // this is a breather in a nod to a struggling laptop
+    .then(() => new Promise((res) => setTimeout(() => res(), 2000)))
   })
 })
