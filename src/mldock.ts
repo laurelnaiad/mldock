@@ -97,7 +97,7 @@ export class MlDock extends EventEmitter {
           return Promise.reject(new Error(`Cannot overwrite ${fname} -- \`overwriteIfPresent\` is not set`))
         }
         else {
-          return Promise.resolve()
+          return fsx.unlink(fname)
         }
       }
       else {
