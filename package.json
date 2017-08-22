@@ -37,25 +37,23 @@
   },
   "scripts-info": {
     "info": "list the high-level npm scripts",
-    "cleanup": "rm -rf the build, and dist and coverage directories",
     "build": "build src and test to build directory, copy dockerfiles to build directory",
+    "test": "run tests and report code coverage into the coverage directory",
     "dist": "build src to dist directory, copy dockerfiles to dist directory, make package content in dist directory",
-    "test": "run tests and report code coverage into the coverage directory"
+    "cleanup": "rm -rf the build, and dist and coverage directories"
   },
   "scripts": {
-    "preversion": "npm-run-all test",
-    "version": "npm-run-all clean_dist dist",
-    "coverage": "node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov && node_modules/.bin/codecov",
-    "test": "npm-run-all clean_build build && node_modules/.bin/nyc node_modules/.bin/mocha build/test/index.unit.js",
     "info": "npm-scripts-info",
     "build": "tsc -p . && shx mkdir -p build/src/dockerFiles && shx cp -R src/dockerFiles/* build/src/dockerFiles/",
+    "test": "npm-run-all clean_build build && node_modules/.bin/nyc node_modules/.bin/mocha build/test/index.unit.js",
     "dist": "tsc -p src && shx mkdir -p dist/dockerFiles && shx cp -R src/dockerFiles/* dist/dockerFiles/ && node scripts/makePackage.js",
     "cleanup": "npm-run-all clean_build clean_cover",
     "clean_build": "shx rm -rf build",
     "clean_cover": "shx rm -rf coverage",
     "clean_dist": "shx rm -rf dist",
-    "prepare_dev": "npm version prerelease && npm pack dist",
-    "prepare_publish": "npm version patch && npm pack dist"
+    "preversion": "npm run test",
+    "version": "npm-run-all clean_dist dist",
+    "version_patch": "npm version patch"
   },
   "devDependencies": {
     "@types/chai": "^4.0.3",
