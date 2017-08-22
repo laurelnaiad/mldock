@@ -232,7 +232,7 @@ export class MlDockClient extends MlDockClientBase {
         const filters = {
           ancestor: [ image.Id.match(/([^\:]*)$/)![1] ]
         }
-        return this.listContainers({ filters })
+        return this.listContainers({ filters, all: true })
         .then(containers => {
           return repeatUntilEmpty(containers, (container) => {
             return this.wipeMarkLogicContainer(container.Id, progressFollower)
