@@ -25,21 +25,22 @@
   },
   "dependencies": {
     "@types/dockerode": "^2.4.5",
-    "@types/request": "^2.0.1",
     "chalk": "^2.1.0",
     "commander": "^2.11.0",
     "dockerode": "^2.5.0",
     "fs-extra": "^4.0.1",
+    "got": "laurelnaiad/got#master",
     "log-update": "^2.1.0",
-    "request": "^2.81.0",
-    "request-progress": "^3.0.0",
-    "tar-fs": "^1.15.3"
+    "tar-fs": "^1.15.3",
+    "through2": "^2.0.3",
+    "tough-cookie": "^2.3.2"
   },
   "scripts-info": {
     "info": "list the high-level npm scripts",
     "cleanup": "rm -rf the build, and dist and coverage directories",
-    "dist": "build src to dist directory, bringing relevant portions of package.json for npm publishing",
-    "test": "run tests and report code coverage into the covarege directory"
+    "build": "build src and test to build directory, copy dockerfiles to build directory",
+    "dist": "build src to dist directory, copy dockerfiles to dist directory, make package content in dist directory",
+    "test": "run tests and report code coverage into the coverage directory"
   },
   "scripts": {
     "preversion": "npm-run-all test",
@@ -59,14 +60,13 @@
   "devDependencies": {
     "@types/chai": "^4.0.3",
     "@types/fs-extra": "^4.0.0",
+    "@types/got": "^7.1.2",
     "@types/mocha": "^2.2.41",
     "@types/sinon": "^2.3.3",
+    "@types/tough-cookie": "^2.3.1",
     "chai": "^4.1.1",
     "codecov": "^2.3.0",
     "dotenv": "^4.0.0",
-    "get-port": "^3.2.0",
-    "graceful-fs": "^4.1.11",
-    "ip": "^1.1.5",
     "mocha": "^3.5.0",
     "npm-run-all": "^4.0.2",
     "npm-scripts-info": "^0.3.6",

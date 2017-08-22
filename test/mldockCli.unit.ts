@@ -2,8 +2,6 @@ import * as path from 'path'
 import { spawn } from 'child_process'
 import { expect, assert } from 'chai'
 import * as fsx from 'fs-extra'
-const getPort = require('get-port')
-const ip = require('ip')
 import * as Docker from 'dockerode'
 import * as sinon from 'sinon'
 

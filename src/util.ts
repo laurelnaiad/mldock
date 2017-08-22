@@ -1,5 +1,3 @@
-import * as request from 'request'
-
 export type HashMap<T> = { [key: string]: T }
 
 export function repeatUntilEmpty<R>(
