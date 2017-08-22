@@ -9,6 +9,7 @@ import * as sinon from 'sinon'
 
 import * as handlers from '../src/cli/handlers'
 import * as downloadCli from '../src/cli/cli-download'
+import * as buildCli from '../src/cli/cli-build'
 
 import * as util from './util.unit'
 import {
@@ -117,7 +118,7 @@ describe('mldock cli', function () {
       sandbox.restore()
     })
 
-    it('should error if missing email', function () {
+    it('download should error if missing email', function () {
       const missingEmailParams = [
         path.resolve('build/src/cli/cli-download.js'),
         'download',
@@ -136,7 +137,7 @@ describe('mldock cli', function () {
       })
     })
 
-    it('should error if bad credentials', function () {
+    it('download should error if bad credentials', function () {
       util.speedFactor(this, 8)
       const badCredentials = [
         path.resolve('build/src/cli/cli-download.js'),
@@ -155,6 +156,42 @@ describe('mldock cli', function () {
         assert(false, 'should error running program with bad args')
       }, (err) => {
         expect(err.message).to.match(/Bad email/)
+      })
+    })
+
+    it('build should error if insufficient source params', function () {
+      util.speedFactor(this, 8)
+      const missingFile = [
+        path.resolve('build/src/cli/cli-build.js'),
+        'build',
+        '-p',
+        'the problem is the missing email address',
+        '-o',
+        context.version.toString()
+      ]
+      return buildCli.runProgram(missingFile)
+      .then(() => {
+        assert(false, 'should error running program with bad args')
+      }, (err) => {
+        expect(err.message).to.match(/action requires at least/)
+      })
+    })
+
+    it('build should error if file not found', function () {
+      util.speedFactor(this, 8)
+      const missingFile = [
+        path.resolve('build/src/cli/cli-build.js'),
+        'build',
+        '-f',
+        'not-a-real-file.rpm',
+        '-o',
+        context.version.toString()
+      ]
+      return buildCli.runProgram(missingFile)
+      .then(() => {
+        assert(false, 'should error running program with bad args')
+      }, (err) => {
+        expect(err.message).to.match(/File not found/)
       })
     })
   })
