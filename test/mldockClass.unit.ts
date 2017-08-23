@@ -11,6 +11,8 @@ import {
   defaultFollower
 } from '../src'
 
+const progressFollower = defaultFollower
+
 function testLiveHostAndRemoveSafely(
   mldock: MlDock,
   ct: Docker.Container,
@@ -40,44 +42,47 @@ function testLiveHostAndRemoveSafely(
 
 function testInstall(
   mldock: MlDock,
-  source: string | DevCreds,
+  rpmSource: string | DevCreds,
   version: MlVersion,
 ) {
   return mldock.inspectVersion(version)
-  .then((imageInfo) => {
-    return mldock.removeVersion(version)
-  }, (err: any) => {
-    if (err.statusCode !== 404) {
-      throw err
+  .then(
+    (imageInfo) => mldock.removeVersion(version),
+    (err: any) => {
+      if (err.statusCode !== 404) {
+        assert(false, 'failed in removeVersion, ' + err.stack)
+      }
     }
-    assert(true)
+  )
+  .then(() => {
+    return mldock.buildVersion({
+      version,
+      rpmSource,
+      overwrite: true,
+      baseImage: undefined,
+      progressFollower
+    })
   })
-  .then(() => mldock.buildVersion(
-    version,
-    source,
-    true,
-    defaultFollower,
-  ))
-  .catch((err: Error) => assert(false, err.stack))
+  .then(() => {}, (err: Error) => assert(false, err.stack))
   .then(() => mldock.inspectVersion(version))
   .then((imageInfo) => {
     assert.ok(imageInfo.Id, 'No Id property on inspected image')
   })
   .then(() => mldock.client.isVersionPresent(version, defaultFollower))
   .then((isPresent) => expect(isPresent).to.be.true)
-  .then(() => mldock.buildVersion(
+  .then(() => mldock.buildVersion({
     version,
-    source,
-    false, // <= don't overwrite
-    defaultFollower,
-  ))
+    rpmSource,
+    overwrite: false,
+    progressFollower,
+  }))
   .then(
     () => assert(false, 'Should error trying to overwrite if not opted in'),
     (err) => {}
   )
-  .then(() => util.createBasicHost(mldock, version, defaultFollower))
+  .then(() => util.createBasicHost(mldock, version, progressFollower))
   .then((ct) => {
-    return mldock.startHostHealthy(ct.id!, 30, defaultFollower)
+    return mldock.startHostHealthy(ct.id!, 30, progressFollower)
     .then((ct) => testLiveHostAndRemoveSafely(mldock, ct, version))
   })
 }
@@ -89,7 +94,7 @@ describe('MlDock class', function () {
     expect(tforF).to.equal(`test-mldock-marklogic:9.0.1`)
   })
 
-  it('download and builds MarkLgic image in the docker host', function () {
+  it('downloads and builds MarkLgic image in the docker host', function () {
     util.speedFactor(this, 987)
 
     return testInstall(
@@ -119,6 +124,6 @@ describe('MlDock class', function () {
   after(function () {
     util.speedFactor(this, 21)
     const ctx = util.getContext()
-    return ctx.mldock.removeVersion(ctx.version, defaultFollower)
+    return ctx.mldock.removeVersion(ctx.version, progressFollower)
   })
 })

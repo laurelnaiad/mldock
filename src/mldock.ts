@@ -124,26 +124,30 @@ export class MlDock extends EventEmitter {
    * Builds a specific version of MarkLogic as an image in the configured docker
    * repository.
    */
-  buildVersion(
+  buildVersion(options: {
     version: string | MlVersion,
     /** either path to rpm file or credentials */
-    source: string | DevCreds,
+    rpmSource: string | DevCreds,
     overwrite?: boolean,
+    baseImage?: string,
     progressFollower?: ProgressFollower
-  ): Promise<string> {
-    progressFollower = getProgressFollower(progressFollower)
-    const versionObj = this.getVersionObject(version)
+  }): Promise<string> {
+    const progressFollower = getProgressFollower(options.progressFollower)
+    const versionObj = this.getVersionObject(options.version)
+    const { overwrite, ...myOpts } = options
     return this.client.isVersionPresent(versionObj, progressFollower)
     .then((isPresent) => {
-      if (!overwrite) {
-        throw new Error(`Version ${ version } is already present in the host.`)
+      if (isPresent && !overwrite) {
+        throw new Error(`Version ${ options.version } is already present in the host.`)
+      }
+      else {
+        return this.client.buildMarkLogicVersion({
+          ...myOpts,
+          progressFollower,
+          version: versionObj
+        })
       }
     })
-    .then(() => this.client.buildMarkLogicVersion(
-      versionObj,
-      source,
-      progressFollower!,
-    ))
   }
 
   /**

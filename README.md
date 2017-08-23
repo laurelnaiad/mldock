@@ -17,12 +17,6 @@ mldock:
 
 It does very little beyond that, but to allow for substitution of fancier baselines _underneath_ the MarkLogic image.
 
-## Status
-
-This is alpha software (8/20/2017). It passes its tests, but the api may change.
-
-That said, testing this is a heavy lift (see raison d'être, above), so it may be near its terminal feature set.
-
 ## Installation
 
 Prerequisites:

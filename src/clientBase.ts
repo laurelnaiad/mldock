@@ -46,36 +46,34 @@ export class MlDockClientBase extends Docker {
     super(dockerOptions)
   }
 
-  public recreateHostContainer(
-    params: {
-      containerName?: string,
-      imageId: string,
-      version: MlVersion,
-      usingVolume?: string,
-      healthCheck?: HealthCheckSpec
-      progressFollower: ProgressFollower
-    },
-  ): Promise<Docker.Container> {
+  public recreateHostContainer(options: {
+    containerName?: string,
+    imageId: string,
+    version: MlVersion,
+    usingVolume?: string,
+    healthCheck?: HealthCheckSpec
+    progressFollower: ProgressFollower
+  }): Promise<Docker.Container> {
     const param = {
-      name: params.containerName,
-      Image: params.imageId,
+      name: options.containerName,
+      Image: options.imageId,
       Tty: true,
       Detach: true,
       HostConfig: {
         PublishAllPorts: true
       },
-      Healthcheck: params.healthCheck,
-      Volumes: params.usingVolume ? {
-        [`src=${params.usingVolume},dst=${DATA_DIR}`]: {}
+      Healthcheck: options.healthCheck,
+      Volumes: options.usingVolume ? {
+        [`src=${options.usingVolume},dst=${DATA_DIR}`]: {}
       } : undefined,
       Labels: {
         [`${this.libOptions.domain}`]: '',
-        [`${this.libOptions.domain}.version`]: params.version.toDotString(),
+        [`${this.libOptions.domain}.version`]: options.version.toDotString(),
         [`${this.libOptions.domain}.repo`]: this.libOptions.repo,
       },
     }
-    return (params.containerName ?
-      this.wipeMarkLogicContainer(params.containerName, params.progressFollower) :
+    return (options.containerName ?
+      this.wipeMarkLogicContainer(options.containerName, options.progressFollower) :
       Promise.resolve()
     )
     .then(() => this.createContainer(param))
@@ -92,46 +90,44 @@ export class MlDockClientBase extends Docker {
   /**
    * Resolves to `id` of built image.
    * @param libOptions
-   * @param params
+   * @param options
    */
-  protected buildMlDockImage(
-    params: {
-      imageName?: string,
-      /** name in logs for the image */
-      friendlyReference: string,
-      dockerFile: string,
-      contextPath: string,
-      forVersion?: MlVersion,
-      /** files to make available to build -- if not listed here, will be ignored */
-      files: string[],
-      /** docker buildargs */
-      buildargs: HashMap<string| undefined>,
-    },
+  protected buildMlDockImage(options: {
+    imageName?: string,
+    /** name in logs for the image */
+    friendlyReference: string,
+    dockerFile: string,
+    contextPath: string,
+    version: MlVersion,
+    /** files to make available to build -- if not listed here, will be ignored */
+    files: string[],
+    /** docker buildargs */
+    buildargs: HashMap<string| undefined>,
     progressFollower: ProgressFollower
-  ): Promise<DockerResourceId> {
-    progressFollower('preparing ' + params.friendlyReference)
-    fsx.mkdirpSync(params.contextPath)
+  }): Promise<DockerResourceId> {
+    options.progressFollower('preparing ' + options.friendlyReference)
+    fsx.mkdirpSync(options.contextPath)
     const ignoredFiles = this.getIngoredFiles(
-      params.contextPath,
-      params.files
+      options.contextPath,
+      options.files
     )
-    const tarred = tar.pack(params.contextPath, {
+    const tarred = tar.pack(options.contextPath, {
       ignore: (name: string) => !!ignoredFiles.find(f => !!path.basename(name).match(f))
     })
     const labels = {
       [`${this.libOptions.domain}`]: '',
       [`${this.libOptions.domain}.repo`]: this.libOptions.repo,
     }
-    if (params.forVersion) {
-      labels[`${this.libOptions.domain}.version`] = params.forVersion.toDotString()
+    if (options.version) {
+      labels[`${this.libOptions.domain}.version`] = options.version.toDotString()
     }
-    progressFollower('building ' + params.friendlyReference)
+    options.progressFollower('building ' + options.friendlyReference)
     return this.buildImage(tarred, {
-      t: params.imageName,
-      buildargs: params.buildargs,
+      t: options.imageName,
+      buildargs: options.buildargs,
       labels
     })
-    .then((stream) => progressToLogLines(stream, (line) => progressFollower(undefined, line)))
+    .then((stream) => progressToLogLines(stream, (line) => options.progressFollower(undefined, line)))
   }
 
   protected wipeMarkLogicContainer(

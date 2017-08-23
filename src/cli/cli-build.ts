@@ -12,6 +12,7 @@ export function buildCmd(version: string, options: {
   repo: string,
   rpmFile?: string,
   email?: string,
+  baseImage?: string,
   password?: string,
   overwrite?: boolean
 }): Promise<string> {
@@ -23,15 +24,16 @@ export function buildCmd(version: string, options: {
       'The `build` action requires either the `rpmFile` or the `email` and `password` options to be set.'
     ))
   }
-  const source = options.rpmFile ? options.rpmFile : <DevCreds>options
+  const rpmSource = options.rpmFile ? options.rpmFile : <DevCreds>options
   const currentStep = { step: undefined }
   const mld = new MlDock({ repo: options.repo })
-  return mld.buildVersion(
+  return mld.buildVersion({
     version,
-    source,
-    options.overwrite,
-    cliFollower.bind(cliFollower, currentStep)
-  )
+    rpmSource,
+    overwrite: options.overwrite,
+    baseImage: options.baseImage,
+    progressFollower: cliFollower.bind(cliFollower, currentStep)
+  })
 }
 
 export function buildProgram() {
@@ -40,6 +42,7 @@ export function buildProgram() {
   .option(...opts.repo)
   .option(...opts.rpmFile)
   .option(...opts.email)
+  .option(...opts.baseImage)
   .option(...opts.password)
   .option(...opts.overwriteImage)
 

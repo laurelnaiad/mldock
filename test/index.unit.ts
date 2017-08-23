@@ -22,7 +22,7 @@ myLibs.forEach((lib, i) => (myLibs[i] = require(lib)))
  * version to make room for subsequent installs, or they
  * need to continue with existing version
  */
-describe('mldock package', function () {
+describe('mldock', function () {
   let mld: MlDock
   let version: MlVersion
   let containerName: string

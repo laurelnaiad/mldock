@@ -55,9 +55,36 @@ function stubDownload(sb: sinon.SinonSandbox, stub: (
   return sb.stub(MlDock.prototype, 'downloadVersion').callsFake(stub)
 }
 
+function tagCentos(context: { mldock: MlDock, version: MlVersion }) {
+  const mld = context.mldock
+  const centos = `centos:${context.version.compatibleCentos}`
+  return mld.client.pull(centos, {})
+  .then(() => mld.client.getImage(centos).tag({
+    repo: 'test-mldock',
+    tag: 'test-image-override'
+  }))
+}
+
+function isImageOverridden(context: { mldock: MlDock, version: MlVersion }) {
+  const mld = context.mldock
+  const tag = `centos:${context.version.compatibleCentos}`
+  return mld.client.listImages({
+    since: 'test-mldock:test-image-override'
+  })
+  .then((images) => {
+    const myImage = images.find((i) => {
+
+      return !!i.RepoTags.find((t) => {
+        console.log(t)
+        return t === `test-mldock-os:${context.version.compatibleCentos}-compat`
+      })
+    })
+    expect(myImage, '').to.be.ok
+  })
+}
 
 module.exports = () =>
-describe('mldock cli', function () {
+describe('cli', function () {
   let downloadFile: string
   let context: util.TestContext
 
@@ -68,27 +95,38 @@ describe('mldock cli', function () {
   }
 
   before(function () {
+    util.speedFactor(this, 377)
     context = util.getContext()
     downloadFile = path.join(
       util.testDownloadDir,
       context.version.downloadUrl.match(/([^\/]+)$/)![1]
     )
+    return tagCentos(context)
   })
 
   after(function () {
+    util.speedFactor(this, 21)
     return context.mldock.removeVersion(context.version)
   })
 
-
-  describe('cli download/build', function () {
+  describe('download/build', function () {
     let sandbox: sinon.SinonSandbox
     let ehStub: sinon.SinonStub
+    let liveContainer: Docker.Container
+
     beforeEach(function () {
       sandbox = sinon.sandbox.create()
       ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
     })
     afterEach(function () {
       sandbox.restore()
+    })
+
+    after(function () {
+      util.speedFactor(this, 21)
+      // hit the `else` in wipeMarkLogicContainer by giving it a stopped container
+      return liveContainer.stop()
+      .then(() => context.mldock.removeVersion(context.version))
     })
 
     it('builds MarkLogic image from a local rpm file in the docker host', function () {
@@ -110,6 +148,8 @@ describe('mldock cli', function () {
         '-o',
         '-r',
         'test-mldock',
+        '-b',
+        'test-mldock:test-image-override',
         '-f',
         downloadFile,
         context.version.toString()
@@ -118,13 +158,10 @@ describe('mldock cli', function () {
       .then(() => fsx.mkdirp(util.testDownloadDir))
       .then(() => runCli(downloadArgs))
       .then(() => runCli(buildArgs))
+      .then(() => isImageOverridden(context))
       .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
-      .then((ct) => {
-        return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
-        // hit the `else` in wipeMarkLogicContainer by giving it a stopped container
-        .then(() => ct.stop())
-        .then(() => context.mldock.removeVersion(context.version))
-      })
+      .then((ct) => context.mldock.startHostHealthy(ct.id!, 30, defaultFollower))
+      .then((ct) => liveContainer = ct)
     })
 
     it('download should error if try overwrite w/out option', function () {
@@ -159,6 +196,8 @@ describe('mldock cli', function () {
       const overwriteNotOptedIn = [
         path.resolve('build/src/cli/cli-build.js'),
         'build',
+        '-r',
+        'test-mldock',
         '-f',
         downloadFile,
         context.version.toString()
@@ -195,7 +234,7 @@ describe('mldock cli', function () {
         path.resolve('build/src/cli/cli-download.js'),
         'download',
         '-o',
-        '-r',
+        '-d',
         util.testDownloadDir,
         '-p',
         process.env.MARKLOGIC_DEV_PASSWORD!,

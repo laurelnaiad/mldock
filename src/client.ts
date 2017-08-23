@@ -44,8 +44,6 @@ export class MlDockClient extends MlDockClientBase {
     version: MlVersion,
     progressFollower: ProgressFollower
   ) {
-    const msg = `is ${version.toString()} present?`
-    progressFollower(undefined, msg)
     return this.listImages({
       filters: {
         reference: [ `${this.libOptions.repo}-marklogic:${version.toDotString()}` ]
@@ -54,12 +52,12 @@ export class MlDockClient extends MlDockClientBase {
     .then((images) => images.length > 0)
   }
 
-  ensureOSImage(
-    fromOsImageId: string | undefined,
-    forVersion: MlVersion,
+  ensureOSImage(options: {
+    baseImage?: string,
+    version: MlVersion,
     progressFollower: ProgressFollower
-  ): Promise<DockerResourceId> {
-    const imgName = `${this.libOptions.repo}-os:${forVersion.compatibleCentos}-compat`
+  }): Promise<DockerResourceId> {
+    const imgName = `${this.libOptions.repo}-os:${options.version.compatibleCentos}-compat`
     const listed: any = this.listImages({
       filters: {
         reference: [ imgName ]
@@ -68,18 +66,18 @@ export class MlDockClient extends MlDockClientBase {
     return listed
     .then((matching: Docker.ImageInfo[]) => {
       if (!matching[0]) {
-        return this.buildOSImage(fromOsImageId, forVersion, progressFollower)
+        return this.buildOSImage(options)
       }
     })
     .then(() => imgName)
   }
 
-  buildOSImage(
-    fromOsImageId: string | undefined,
-    forVersion: MlVersion,
+  buildOSImage(options: {
+    baseImage?: string,
+    version: MlVersion,
     progressFollower: ProgressFollower
-  ): Promise<DockerResourceId> {
-    const imageName = `${this.libOptions.repo}-os:${forVersion.compatibleCentos}-compat`
+  }): Promise<DockerResourceId> {
+    const imageName = `${this.libOptions.repo}-os:${options.version.compatibleCentos}-compat`
     const contextPath = path.join(TEMP_DIR, 'build-' + imageName.replace(/\:/g, '_'))
 
     return fsx.mkdirp(contextPath)
@@ -92,7 +90,7 @@ export class MlDockClient extends MlDockClientBase {
       path.join(contextPath, 'mldownload.sh'))
     )
     .then(() => fsx.copy(
-      path.join(__dirname, `dockerFiles/${forVersion.compatibleCentos}.Dockerfile`),
+      path.join(__dirname, `dockerFiles/${options.version.compatibleCentos}.Dockerfile`),
       path.join(contextPath, `Dockerfile`))
     )
     .then(() => this.buildMlDockImage({
@@ -100,34 +98,35 @@ export class MlDockClient extends MlDockClientBase {
       imageName,
       dockerFile: path.join(contextPath, `Dockerfile`),
       contextPath,
-      forVersion,
+      version: options.version,
       files: [ 'mlrun.sh', 'mldownload.sh' ],
       buildargs: {
-        osImage: fromOsImageId || `centos:${forVersion.compatibleCentos}`,
-      }
-    }, progressFollower))
+        osImage: options.baseImage || `centos:${options.version.compatibleCentos}`,
+      },
+      progressFollower: options.progressFollower
+    }))
     .then(() => fsx.remove(contextPath))
     .then(() => {
-      progressFollower(undefined)
+      options.progressFollower(undefined)
       return imageName
     })
   }
 
-  buildMarkLogicVersion(
-    forVersion: MlVersion,
+  buildMarkLogicVersion(options: {
+    version: MlVersion,
     rpmSource: string | DevCreds,
+    baseImage?: string,
     progressFollower: ProgressFollower,
-    osImageOverride?: string,
-  ): Promise<string> {
-    const version = forVersion.toDotString()
+  }) : Promise<string> {
+    const rpmSource = options.rpmSource
     if (typeof rpmSource === 'string' && !fsx.existsSync(rpmSource)) {
       return Promise.reject(new Error('File not found: ' + rpmSource))
     }
-    return this.ensureOSImage(osImageOverride, forVersion, progressFollower)
+    return this.ensureOSImage(options)
     .then(osImage => {
       const contextPath = typeof rpmSource === 'string' ?
           path.dirname(path.resolve(rpmSource)) :
-          path.join(TEMP_DIR, 'build-' + forVersion.toDotString().replace(/\./g, '_'))
+          path.join(TEMP_DIR, 'build-' + options.version.toDotString().replace(/\./g, '_'))
       let rpmFile: string | undefined = undefined
       const files: string[] = []
       return fsx.copy(
@@ -157,33 +156,30 @@ export class MlDockClient extends MlDockClientBase {
           files.push(rpmFile)
         }
         const buildargs = {
+          version: options.version.toDotString(),
           osImage,
           rpmFile,
-          version,
           email: (<DevCreds>rpmSource).email,
           password: (<DevCreds>rpmSource).password,
-          rawUrl: forVersion.downloadUrl,
+          rawUrl: options.version.downloadUrl,
         }
-        const imageName = `${this.libOptions.repo}-marklogic:${forVersion.toDotString()}`
-        return this.buildMlDockImage(
-          {
-            imageName,
-            friendlyReference: 'MarkLogic ' + forVersion.toString(),
-            dockerFile: path.resolve(contextPath, 'Dockerfile'),
-            contextPath,
-            forVersion,
-            files,
-            buildargs
-          },
-          progressFollower
-        )
+        const imageName = `${this.libOptions.repo}-marklogic:${options.version.toDotString()}`
+        return this.buildMlDockImage({
+          version: options.version,
+          imageName,
+          friendlyReference: 'MarkLogic ' + options.version.toString(),
+          dockerFile: path.resolve(contextPath, 'Dockerfile'),
+          contextPath,
+          files,
+          buildargs,
+          progressFollower: options.progressFollower
+        })
         .then(() => {
-          progressFollower(undefined, 'pruning images')
+          options.progressFollower(undefined, 'pruning images')
           return this.pruneImages()
         })
         .then(() => {
-          progressFollower(undefined, 'pruned')
-          progressFollower(undefined)
+          options.progressFollower(undefined)
           return imageName
         })
       })

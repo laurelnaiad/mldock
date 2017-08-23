@@ -31,3 +31,7 @@ export const overwriteFile = [
   '-o, --overwrite',
   'Overwrite existing file, if present',
 ]
+export const baseImage = [
+  '-b, --base',
+  'Substitute base image in place of CentOS official image',
+]
