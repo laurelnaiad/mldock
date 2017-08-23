@@ -28,7 +28,7 @@ export interface LibOptions {
 }
 
 const defaultOptions = {
-  domain: 'com.github.laurelnaiad.mldock',
+  domain: 'org.npm.package.mldock',
   repo: 'mldock',
   tempDir: path.resolve(__dirname, '.temp'),
 }
