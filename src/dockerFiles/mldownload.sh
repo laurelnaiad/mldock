@@ -15,5 +15,5 @@ MLDOWNLOADURL=$(curl -s -X POST \
 echo ""
 echo "downloading MarkLogic from $MLDOWNLOADURL"
 
-wget -O $4 $MLDOWNLOADURL
+wget -O $4 --progress=bar:force $MLDOWNLOADURL
 rm -f developer.marklogic.jar

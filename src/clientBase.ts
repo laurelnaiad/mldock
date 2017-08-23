@@ -113,7 +113,7 @@ export class MlDockClientBase extends Docker {
     fsx.mkdirpSync(params.contextPath)
     const ignoredFiles = this.getIngoredFiles(
       params.contextPath,
-      params.files || []
+      params.files
     )
     const tarred = tar.pack(params.contextPath, {
       ignore: (name: string) => !!ignoredFiles.find(f => !!path.basename(name).match(f))
@@ -134,17 +134,6 @@ export class MlDockClientBase extends Docker {
     .then((stream) => progressToLogLines(stream, (line) => progressFollower(undefined, line)))
   }
 
-  protected handleError404Ok(err: Error & { statusCode?: number } | string) {
-    if (err instanceof Error) {
-      if (!(err.statusCode === 404 || err.message.match(/unrecognized image ID/))) {
-        throw err
-      }
-    }
-    else {
-      throw new Error(err)
-    }
-  }
-
   protected wipeMarkLogicContainer(
     id: string,
     progressFollower: ProgressFollower
@@ -159,7 +148,7 @@ export class MlDockClientBase extends Docker {
       else {
         return cont.remove()
       }
-    }, (err) => this.handleError404Ok(err))
+    })
     .then(() => progressFollower(undefined))
   }
 
