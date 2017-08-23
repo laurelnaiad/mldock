@@ -110,11 +110,12 @@ export function downloadRpm(
           myTime = myTime || new Date()
           let newPercent = Math.round(state.percent * 100)
           if (newPercent > progressPercent) {
+            progressPercent = newPercent
             progressFollower(undefined, newPercent + '%' )
             myTime = new Date()
           }
           else {
-            const diffSecs = (now.valueOf() - myTime.valueOf()) * 1000
+            const diffSecs = (now.valueOf() - myTime.valueOf()) / 1000
             if (diffSecs > notifyFreq) {
               progressFollower(undefined, 'this is going slowly... ')
               if (notifyFreq <= 60) {
