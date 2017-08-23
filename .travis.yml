@@ -17,8 +17,9 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_1fd173b91261_key -iv $encrypted_1fd173b91261_iv -in ci/build_args.encrypted -out ci/build_args -d
 
 script:
-- yarn run test
-- yarn run dist
+- yarn
+- yarn test
+- yarn dist
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
