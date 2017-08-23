@@ -7,7 +7,7 @@ RUN     mkdir -p /var/opt/MarkLogic && \
         chmod ug+rwx /var/opt/MarkLogic && \
         yum clean expire-cache && \
         yum -y install bash.x86_64 glibc.i686 glibc.x86_64 gdb.x86_64 \
-        libgcc.x86_64 libstdc++.x86_64 redhat-lsb-core.x86_64 initscripts \
+        libgcc.x86_64 libstdc++.x86_64 redhat-lsb.x86_64 initscripts \
         wget curl && \
         yum clean all
 
