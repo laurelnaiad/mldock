@@ -8,6 +8,8 @@
 
 ## Description
 
+_mldock_ was conceived as a means of building Docker images to host MarkLogic Server in a repeatable manner, so that other systems don't suffer headaches developing/testing such a heavyweight operation.
+
 mldock:
 
 * downloads MarkLogic .rpm files from MarkLogic using the developer credentials you bring;
@@ -17,7 +19,9 @@ It does very little beyond that, but to allow for substitution of fancier baseli
 
 ## Status
 
-This is alpha software (8/20/2017). The api may change as it gets some use. That said, this builder is meant to serve as a baseline for other things, and so it may have reached its terminal feature set, give or take some polish/knobs and dials.
+This is alpha software (8/20/2017). It passes its tests, but the api may change.
+
+That said, testing this is a heavy lift (see raison d'être, above), so it may be near its terminal feature set.
 
 ## Installation
 

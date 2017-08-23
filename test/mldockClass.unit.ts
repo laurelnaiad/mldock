@@ -102,11 +102,23 @@ describe('MlDock class', function () {
     )
   })
 
+  it('should be a no-op to wipe a non-existent container', function () {
+    util.speedFactor(this, 987)
+
+    return testInstall(
+      util.getContext().mldock,
+      {
+        email: process.env.MARKLOGIC_DEV_EMAIL!,
+        password: process.env.MARKLOGIC_DEV_PASSWORD!,
+      },
+      util.getContext().version
+    )
+  })
+
+
   after(function () {
-    util.speedFactor(this, 8)
+    util.speedFactor(this, 21)
     const ctx = util.getContext()
     return ctx.mldock.removeVersion(ctx.version, defaultFollower)
-    // this is a breather in a nod to a struggling laptop
-    .then(() => new Promise((res) => setTimeout(() => res(), 2000)))
   })
 })

@@ -11,7 +11,6 @@ import {
 import * as opts from './opts'
 import * as util from '../util'
 
-
 export function handleSuccess(result: any) {
   console.log(`\n${result.toString().trim()}`)
   process.exit()
