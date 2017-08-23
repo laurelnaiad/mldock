@@ -3,7 +3,7 @@ FROM $osImage as getter
 
 COPY    mldownload.sh mldownload.sh
 RUN     yum install -y curl openssl wget
-RUN     wget -O jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
+RUN     wget -O jq --progress=bar:force https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
         chmod ug+rwx ./jq ./mldownload.sh && mv jq /usr/bin
 ARG rawUrl
 ARG email

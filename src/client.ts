@@ -208,6 +208,7 @@ export class MlDockClient extends MlDockClientBase {
           containerInspect
         })
       }, (err: any) => {
+        /* istanbul ignore else */
         if (err.statusCode === 404) {
           res()
         }

@@ -6,9 +6,10 @@ import * as Docker from 'dockerode'
 const { Command } = require('commander')
 import * as sinon from 'sinon'
 
-import * as handlers from '../src/cli/handlers'
+import * as cli from '../src/cli/cli'
 import * as downloadCli from '../src/cli/cli-download'
 import * as buildCli from '../src/cli/cli-build'
+import * as handlers from '../src/cli/handlers'
 
 import * as util from './util.unit'
 import {
@@ -57,9 +58,10 @@ function stubDownload(sb: sinon.SinonSandbox, stub: (
 
 module.exports = () =>
 describe('mldock cli', function () {
+  let downloadFile: string
   let context: util.TestContext
 
-  function errorHandlerStub(expectFunc: Function) {
+  function errorHandlerStub(sandbox: sinon.SinonSandbox, expectFunc: Function) {
     return sandbox.stub(handlers, 'handleError').callsFake((
       err: Error | string | number
     ) => expectFunc(err))
@@ -67,19 +69,23 @@ describe('mldock cli', function () {
 
   before(function () {
     context = util.getContext()
+    downloadFile = path.join(
+      util.testDownloadDir,
+      context.version.downloadUrl.match(/([^\/]+)$/)![1]
+    )
   })
 
   after(function () {
     return context.mldock.removeVersion(context.version)
   })
 
-  let sandbox: sinon.SinonSandbox
-  let ehStub: sinon.SinonStub
-  sandbox = sinon.sandbox.create()
 
   describe('cli download/build', function () {
+    let sandbox: sinon.SinonSandbox
+    let ehStub: sinon.SinonStub
     beforeEach(function () {
-      ehStub = errorHandlerStub((err: Error) => { throw err })
+      sandbox = sinon.sandbox.create()
+      ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
     })
     afterEach(function () {
       sandbox.restore()
@@ -105,7 +111,7 @@ describe('mldock cli', function () {
         '-r',
         'test-mldock',
         '-f',
-        path.join(util.testDownloadDir, context.version.downloadUrl.match(/([^\/]+)$/)![1]),
+        downloadFile,
         context.version.toString()
       ]
       return fsx.remove(util.testDownloadDir)
@@ -115,13 +121,15 @@ describe('mldock cli', function () {
       .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
       .then((ct) => {
         return context.mldock.startHostHealthy(ct.id!, 30, defaultFollower)
-        .then(() => context.mldock.removeAll())
+        // hit the `else` in wipeMarkLogicContainer by giving it a stopped container
+        .then(() => ct.stop())
+        .then(() => context.mldock.removeVersion(context.version))
       })
     })
 
     it('download should error if try overwrite w/out option', function () {
       util.speedFactor(this, 8)
-      const missingEmailParams = [
+      const overwriteNotOptedIn = [
         path.resolve('build/src/cli/cli-download.js'),
         'download',
         '-d',
@@ -132,7 +140,12 @@ describe('mldock cli', function () {
         process.env.MARKLOGIC_DEV_PASSWORD!,
         context.version.toString()
       ]
-      return downloadCli.runProgram(missingEmailParams)
+      const prog = downloadCli.downloadProgram()
+      return cli.runProgram(
+        prog,
+        overwriteNotOptedIn,
+        downloadCli.downloadCmd
+      )
       .then(() => {
         assert(false, 'should error running program with bad args')
       }, (err) => {
@@ -140,31 +153,67 @@ describe('mldock cli', function () {
         expect(ehStub.firstCall.args[0].toString()).to.match(/Cannot overwrite/)
       })
     })
+
+    it('build should error if try overwrite w/out option', function () {
+      util.speedFactor(this, 8)
+      const overwriteNotOptedIn = [
+        path.resolve('build/src/cli/cli-build.js'),
+        'build',
+        '-f',
+        downloadFile,
+        context.version.toString()
+      ]
+      const prog = buildCli.buildProgram()
+      return cli.runProgram(
+        prog,
+        overwriteNotOptedIn,
+        buildCli.buildCmd
+      )
+      .then(() => {
+        assert(false, 'should error running program with bad args')
+      }, (err) => {
+        expect(ehStub.callCount).to.equal(1)
+        expect(ehStub.firstCall.args[0].toString()).to.match(/is already present/)
+      })
+    })
   })
 
   describe('params parsing', function () {
+    let sandbox: sinon.SinonSandbox
+    let ehStub: sinon.SinonStub
     beforeEach(function () {
-      ehStub = errorHandlerStub((err: Error) => { throw err })
+      sandbox = sinon.sandbox.create()
+      ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
     })
     afterEach(function () {
       sandbox.restore()
     })
+
     it('download should error if missing email', function () {
+      util.speedFactor(this, 8)
       const missingEmailParams = [
         path.resolve('build/src/cli/cli-download.js'),
         'download',
-        '-d',
+        '-o',
+        '-r',
         util.testDownloadDir,
         '-p',
         process.env.MARKLOGIC_DEV_PASSWORD!,
         context.version.toString()
       ]
-      return downloadCli.runProgram(missingEmailParams)
+      const prog = downloadCli.downloadProgram()
+      return cli.runProgram(
+        prog,
+        missingEmailParams,
+        downloadCli.downloadCmd
+      )
       .then(() => {
         assert(false, 'should error running program with bad args')
       }, (err) => {
         expect(ehStub.callCount).to.equal(1)
-        expect(ehStub.firstCall.args[0]).to.be.an.instanceOf(Error)
+        expect((ehStub.firstCall.args[0] as Error).message).to.match(
+          /The `download` action requires/
+        )
       })
     })
 
@@ -178,11 +227,16 @@ describe('mldock cli', function () {
         '-o',
         '-e',
         'joe@example.com',
-          '-p',
+        '-p',
         'bad password',
         context.version.toString()
       ]
-      return downloadCli.runProgram(badCredentials)
+      const prog = downloadCli.downloadProgram()
+      return cli.runProgram(
+        prog,
+        badCredentials,
+        downloadCli.downloadCmd
+      )
       .then(() => {
         assert(false, 'should error running program with bad args')
       }, (err) => {
@@ -192,7 +246,7 @@ describe('mldock cli', function () {
 
     it('build should error if insufficient source params', function () {
       util.speedFactor(this, 8)
-      const missingFile = [
+      const missingEmail = [
         path.resolve('build/src/cli/cli-build.js'),
         'build',
         '-p',
@@ -200,11 +254,16 @@ describe('mldock cli', function () {
         '-o',
         context.version.toString()
       ]
-      return buildCli.runProgram(missingFile)
+      const prog = buildCli.buildProgram()
+      return cli.runProgram(
+        prog,
+        missingEmail,
+        buildCli.buildCmd
+      )
       .then(() => {
         assert(false, 'should error running program with bad args')
       }, (err) => {
-        expect(err.message).to.match(/action requires at least/)
+        expect(err.message).to.match(/The `build` action requires either/)
       })
     })
 
@@ -218,7 +277,12 @@ describe('mldock cli', function () {
         '-o',
         context.version.toString()
       ]
-      return buildCli.runProgram(missingFile)
+      const prog = buildCli.buildProgram()
+      return cli.runProgram(
+        prog,
+        missingFile,
+        buildCli.buildCmd
+      )
       .then(() => {
         assert(false, 'should error running program with bad args')
       }, (err) => {

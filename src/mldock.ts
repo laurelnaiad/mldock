@@ -42,6 +42,12 @@ export const defaultFollower: ProgressFollower = (
   console.log(step || '', msg && msg.replace(/\n*$/, '') || '')
 }
 
+function getProgressFollower(progressFollower?: ProgressFollower) {
+  return progressFollower =
+      progressFollower || /* istanbul ignore next */
+      ((_: string) => {})
+}
+
 export class MlDock extends EventEmitter {
   libOptions: LibOptions
   readonly client: MlDockClient
@@ -87,7 +93,7 @@ export class MlDock extends EventEmitter {
     overwriteIfPresent?: boolean,
     progressFollower?: ProgressFollower
   ): Promise<string> {
-    progressFollower = progressFollower || ((_: string) => {})
+    progressFollower = getProgressFollower(progressFollower)
     const v = this.getVersionObject(version)
     let overwriteTest: Promise<boolean>
     const fname = path.resolve(targetDirectory, v.rpmName)
@@ -125,23 +131,19 @@ export class MlDock extends EventEmitter {
     overwrite?: boolean,
     progressFollower?: ProgressFollower
   ): Promise<string> {
-    progressFollower = progressFollower || ((_: string) => {})
+    progressFollower = getProgressFollower(progressFollower)
     const versionObj = this.getVersionObject(version)
-    const image = this.client.getImage(this.getTagForVersion(versionObj))
-    return image.inspect()
-    .then((imageInfo) => overwrite, (err) => true)
-    .then(doBuild => {
-      if (doBuild) {
-        return this.client.buildMarkLogicVersion(
-          versionObj,
-          source,
-          progressFollower!,
-        )
-      }
-      else {
+    return this.client.isVersionPresent(versionObj, progressFollower)
+    .then((isPresent) => {
+      if (!overwrite) {
         throw new Error(`Version ${ version } is already present in the host.`)
       }
     })
+    .then(() => this.client.buildMarkLogicVersion(
+      versionObj,
+      source,
+      progressFollower!,
+    ))
   }
 
   /**
@@ -151,7 +153,7 @@ export class MlDock extends EventEmitter {
     version: string | MlVersion,
     progressFollower?: ProgressFollower
   ): Promise<void> {
-    progressFollower = progressFollower || ((_: string) => {})
+    progressFollower = getProgressFollower(progressFollower)
     const versionObj = this.getVersionObject(version)
     return this.client.removeMlDockResources(versionObj, progressFollower)
   }
@@ -163,7 +165,7 @@ export class MlDock extends EventEmitter {
   removeAll(
     progressFollower?: ProgressFollower
   ): Promise<void> {
-    progressFollower = progressFollower || ((_: string) => {})
+    progressFollower = getProgressFollower(progressFollower)
     return this.client.removeMlDockResources(undefined, progressFollower)
   }
 
@@ -177,7 +179,7 @@ export class MlDock extends EventEmitter {
     healthCheck?: HealthCheckSpec,
     progressFollower?: ProgressFollower
   }) {
-    const progressFollower = options.progressFollower || ((_: string) => {})
+    const progressFollower = getProgressFollower(options.progressFollower)
     const param = {
       ...options,
       progressFollower,
@@ -193,13 +195,12 @@ export class MlDock extends EventEmitter {
   }
 
   /**
-   * Starts a host container and returns the results of inspecting it..
+   * Starts a host container.
    */
   startHost(
     id: string,
-  ): Promise<ContainerRuntimeRef> {
+  ): Promise<Docker.Container> {
     return this.client.getContainer(id).start()
-    .then(() => this.hostInspect(id))
   }
 
   /**
@@ -210,19 +211,19 @@ export class MlDock extends EventEmitter {
     timeoutSeconds: number,
     progressFollower?: ProgressFollower
   ) {
-    progressFollower = progressFollower || ((_: string) => {})
-    const ct = this.client.getContainer(id)
+    progressFollower = getProgressFollower(progressFollower)
     progressFollower(`waiting for health_status healthy from ${id}`)
+    const hostCt = this.client.getContainer(id)
     return this.client.startHealthy(
-      () => ct.start(),
-      ct,
+      () => this.startHost(id),
+      hostCt,
       timeoutSeconds,
       progressFollower
     )
-    .then(ct => {
+    .then(_ => {
       progressFollower!(undefined, 'ok')
       progressFollower!(undefined)
-      return ct
+      return hostCt
     })
   }
 }
