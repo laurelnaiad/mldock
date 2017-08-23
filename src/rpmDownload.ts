@@ -10,11 +10,18 @@ import { HashMap } from './util'
 import { MlVersion } from './version'
 import { ProgressFollower } from './progressTracker'
 
+let notifyFreq = 10
+
 export interface DevCreds {
   email: string,
   password: string
 }
 
+/*
+ * the official shas are only on the web download web page, and only for
+ * most recent of each major release, so need to calculate functional shas
+ * and maintain a list of known functional, if not the official shas
+ */
 // function getHasher(hash: crypto.Hash) {
 //   return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
 //     const buffer = Buffer.isBuffer(data) ?
@@ -78,16 +85,18 @@ export function downloadRpm(
         }
         const uri = JSON.parse(resp.body).path
         const filename = path.join(intoDirectory, versionToDownload.rpmName)
+        let progressPercent = 0
+        let myTime: Date
         fsx.mkdirpSync(path.dirname(filename))
 
         // const hasher = getHasher(hash)
-        // the sha's are only on the web site, and only for most recent of each major release
-        // so no go
         // got(`https://developer.marklogic.com/download/${versionToDownload.rpmName}.sha1`, {
         //   headers: { 'cookie': cookie.cookieString() },
         // })
         // const declaredSha = shaResp.body
-        const req = (<any>got).stream(uri, {
+
+        const anyGot = <any>got // typings don't match reality on master re the stream function
+        anyGot.stream(uri, {
           method: 'post',
           headers: {
             'cookie': cookie.cookieString(),
@@ -97,7 +106,23 @@ export function downloadRpm(
           body: { download: versionToDownload.downloadUrl },
         })
         .on('downloadProgress', (state: { percent: number }) => {
-          progressFollower(undefined, Math.round(state.percent * 100) + '%' )
+          const now = new Date()
+          myTime = myTime || new Date()
+          let newPercent = Math.round(state.percent * 100)
+          if (newPercent > progressPercent) {
+            progressFollower(undefined, newPercent + '%' )
+            myTime = new Date()
+          }
+          else {
+            const diffSecs = (now.valueOf() - myTime.valueOf()) * 1000
+            if (diffSecs > notifyFreq) {
+              progressFollower(undefined, 'this is going slowly... ')
+              if (notifyFreq <= 60) {
+                notifyFreq = notifyFreq + 10
+              }
+              myTime = new Date()
+            }
+          }
         })
         .on('error',  /* istanbul ignore next */ (err: Error) => {
           rej(new Error(`Errored trying to download the .rpm file: ${err.stack}`))
