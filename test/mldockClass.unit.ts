@@ -20,7 +20,7 @@ function testLiveHostAndRemoveSafely(
 ) {
   return mldock.hostInspect(ct.id!)
   .then((ctRuntime) => {
-    expect(parseInt(ctRuntime.ports[8001])).to.be.greaterThan(10000)
+    expect(ctRuntime.ports[8001]).to.be.greaterThan(10000)
 
     return ct.kill()
     .then(() => ct.remove())

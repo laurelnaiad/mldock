@@ -26,7 +26,7 @@ export { ProgressFollower }
 export type DockerResourceId = string
 export interface ContainerRuntimeRef {
   id: string,
-  ports: { [port: string]: string },
+  ports: { [port: string]: number },
   containerInspect: Docker.ContainerInspectInfo
 }
 export const ML_RUN_CMD = ['/bin/bash', '-c', '/usr/local/bin/mlrun.sh']

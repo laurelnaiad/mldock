@@ -192,9 +192,9 @@ export class MlDockClient extends MlDockClientBase {
     return new Promise((res, rej) => {
       const cont = this.getContainer(containerId)
       cont.inspect().then(containerInspect => {
-        const portsMap: HashMap<string> = Object.keys(containerInspect.NetworkSettings.Ports).reduce((acc, p) => {
+        const portsMap: HashMap<number> = Object.keys(containerInspect.NetworkSettings.Ports).reduce((acc, p) => {
           const port = p.replace(/\/tcp/, '')
-          const mapped = (<any>containerInspect.NetworkSettings.Ports[p])[0].HostPort
+          const mapped = parseInt((<any>containerInspect.NetworkSettings.Ports[p])[0].HostPort)
           return Object.assign(acc, { [port]: mapped })
         }, {})
         console.log(JSON.stringify(containerInspect, null, 2))
