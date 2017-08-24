@@ -21,13 +21,19 @@ export function downloadCmd(version: string, options: {
   }
   const currentStep = { step: undefined }
   const mld = new MlDock()
-  return mld.downloadVersion(
+  const {
+    dir,
+    email,
+    password,
+    ...myOpts,
+  } = options
+  return mld.downloadVersion({
+    ...myOpts,
     version,
-    options.dir!,
-    <DevCreds>options,
-    options.overwrite,
-    cliFollower.bind(cliFollower, currentStep)
-  )
+    credentials: { email: email!, password: password! },
+    targetDirectory: options.dir!,
+    progressFollower: cliFollower.bind(cliFollower, currentStep)
+  })
 }
 
 export function downloadProgram() {

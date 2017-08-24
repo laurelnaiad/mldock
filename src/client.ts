@@ -99,7 +99,7 @@ export class MlDockClient extends MlDockClientBase {
       dockerFile: path.join(contextPath, `Dockerfile`),
       contextPath,
       version: options.version,
-      files: [ 'mlrun.sh', 'mldownload.sh' ],
+      files: [ ],
       buildargs: {
         osImage: options.baseImage || `centos:${options.version.compatibleCentos}`,
       },

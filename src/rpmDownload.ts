@@ -35,20 +35,21 @@ export interface DevCreds {
 //   })
 // }
 
-export function downloadRpm(
-  intoDirectory: string,
-  versionToDownload: MlVersion,
-  mlDevAcctEmail: string,
-  mlDevAcctpassword: string,
+export function downloadRpm(options: {
+  targetDirectory: string,
+  version: MlVersion,
+  credentials: DevCreds,
   progressFollower: ProgressFollower
-): Promise<string> {
+}): Promise<string> {
   const form = {
-    email: mlDevAcctEmail,
-    password: mlDevAcctpassword,
-    asset: versionToDownload.downloadUrl
+    email: options.credentials.email,
+    password: options.credentials.password,
+    asset: options.version.downloadUrl
   }
-  progressFollower(`downloading version ${versionToDownload.toString()} to ${intoDirectory}  `)
-  progressFollower(undefined, 'logging in')
+  options.progressFollower(
+    `downloading version ${options.version.toString()} to ${options.targetDirectory}  `
+  )
+  options.progressFollower(undefined, 'logging in')
 
   const hash = crypto.createHash('sha1')
   let cookie: tough.Cookie
@@ -67,7 +68,7 @@ export function downloadRpm(
       throw new Error(resp.body)
     }
     cookie = tough.Cookie.parse(resp.headers['set-cookie'][0])!
-    progressFollower(undefined, 'getting download uri')
+    options.progressFollower(undefined, 'getting download uri')
     return new Promise<string>((res, rej) => {
       got('https://developer.marklogic.com/get-download-url', {
         method: 'post',
@@ -76,7 +77,7 @@ export function downloadRpm(
           'cookie': cookie.cookieString()
         },
         form: true,
-        body: { download: versionToDownload.downloadUrl },
+        body: { download: options.version.downloadUrl },
       })
       .then((resp) => {
         /* istanbul ignore next */
@@ -84,7 +85,7 @@ export function downloadRpm(
           throw new Error(`Got non-success trying to get download url: ${resp.statusMessage}: ${resp.statusMessage}`)
         }
         const uri = JSON.parse(resp.body).path
-        const filename = path.join(intoDirectory, versionToDownload.rpmName)
+        const filename = path.join(options.targetDirectory, options.version.rpmName)
         let progressPercent = 0
         let myTime: Date
         fsx.mkdirpSync(path.dirname(filename))
@@ -103,7 +104,7 @@ export function downloadRpm(
             'content-type': 'application/json'
           },
           form: true,
-          body: { download: versionToDownload.downloadUrl },
+          body: { download: options.version.downloadUrl },
         })
         .on('downloadProgress', (state: { percent: number }) => {
           const now = new Date()
@@ -111,14 +112,14 @@ export function downloadRpm(
           let newPercent = Math.round(state.percent * 100)
           if (newPercent > progressPercent) {
             progressPercent = newPercent
-            progressFollower(undefined, newPercent + '%' )
+            options.progressFollower(undefined, newPercent + '%' )
             myTime = new Date()
           }
           else {
             const diffSecs = (now.valueOf() - myTime.valueOf()) / 1000
             /* istanbul ignore if */ // not likely in an unthrottled environment
             if (diffSecs > notifyFreq) {
-              progressFollower(undefined, 'this is going slowly... ')
+              options.progressFollower(undefined, 'this is going slowly... ')
               if (notifyFreq <= 60) {
                 notifyFreq = notifyFreq + 10
               }
@@ -135,7 +136,7 @@ export function downloadRpm(
           const sha = hash.digest('hex')
           // printing the calculated sha without knowning what it was supposed
           // to be would be pretty cruel
-          progressFollower(undefined)
+          options.progressFollower(undefined)
           res(filename)
         })
       })

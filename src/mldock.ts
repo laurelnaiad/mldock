@@ -86,20 +86,24 @@ export class MlDock extends EventEmitter {
   /**
    * Downloads a MarkLogic .rpm file from developer.marklogic.com.
    */
-  downloadVersion(
+  downloadVersion(options: {
     version: string | MlVersion,
     targetDirectory: string,
     credentials: DevCreds,
-    overwriteIfPresent?: boolean,
+    overwrite?: boolean,
     progressFollower?: ProgressFollower
-  ): Promise<string> {
-    progressFollower = getProgressFollower(progressFollower)
-    const v = this.getVersionObject(version)
+  }): Promise<string> {
+    const progressFollower = getProgressFollower(options.progressFollower)
+    const v = this.getVersionObject(options.version)
+    const {
+      overwrite,
+      ...myOpts
+    } = options
     let overwriteTest: Promise<boolean>
-    const fname = path.resolve(targetDirectory, v.rpmName)
+    const fname = path.resolve(options.targetDirectory, v.rpmName)
     return (() => {
       if (fsx.existsSync(fname)) {
-        if (!overwriteIfPresent) {
+        if (!overwrite) {
           return Promise.reject(new Error(`Cannot overwrite ${fname} -- \`overwriteIfPresent\` is not set`))
         }
         else {
@@ -110,13 +114,11 @@ export class MlDock extends EventEmitter {
         return Promise.resolve()
       }
     })()
-    .then(() => downloadRpm(
-      targetDirectory,
-      this.getVersionObject(version),
-      credentials.email,
-      credentials.password,
-      progressFollower!
-    ))
+    .then(() => downloadRpm({
+      ...myOpts,
+      version: this.getVersionObject(options.version),
+      progressFollower
+    }))
     .then((fname) => path.resolve(fname))
   }
 
