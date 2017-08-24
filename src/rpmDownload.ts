@@ -116,6 +116,7 @@ export function downloadRpm(
           }
           else {
             const diffSecs = (now.valueOf() - myTime.valueOf()) / 1000
+            /* istanbul ignore if */ // not likely in an unthrottled environment
             if (diffSecs > notifyFreq) {
               progressFollower(undefined, 'this is going slowly... ')
               if (notifyFreq <= 60) {
