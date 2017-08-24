@@ -8,7 +8,8 @@ RUN     wget -O jq --progress=bar:force https://github.com/stedolan/jq/releases/
 ARG rawUrl
 ARG email
 ARG password
-RUN     ./mldownload.sh $email $password $rawUrl MarkLogic.rpm
+ARG sha
+RUN     ./mldownload.sh $email $password $rawUrl MarkLogic.rpm $sha
 
 
 

@@ -1,5 +1,26 @@
 import * as path from 'path'
 
+import { HashMap } from './util'
+
+export const sha1: HashMap<string> = {
+  '8.0-1': 'ffb1168a4691ccce072af0c1dea57de339c5da4a',
+  '8.0-1.1': '0849ea6f4d2782186103b6688d1f553f1731d032',
+  '8.0-2': '60111da65616957e3e437f8726fcbe16b0ee7ade',
+  '8.0-3': 'df7db6139c8de0ea47d22d4f921c309c88e72970',
+  '8.0-4': '61f9bcda33a19585c71ed6cc9493c44c819b3cf8',
+  '8.0-5': 'd26489a9fef99ddceaa6e5ad70bf49034caa8340',
+  '8.0-6': '93d49986b629b7c8ebd79c50885b39378990e387',
+  '8.0-6.1': '52f3c69907482f6fc74b82b9e19b19242f70e1f0',
+  // '8.0-6.2': undefined,
+  '8.0-6.3': 'e8c8f3df984b9fa4fa747b72d1319ac67b5be939',
+  '8.0-6.4': 'f0b4eea0f0ba8c4d995e5defd7c349063d4ee656',
+  // '8.0-6.5': undefined,
+  '8.0-6.6': 'a81101f9e62739505cd43e824bfcc124c4263a66',
+  '8.0-6.7': '7396a73a3cbc3d80d41112d98ea9f176cc203ef4',
+  '9.0-1': '01e5a7ce3ee07c9acc98d69a649e8dc317b84740',
+  '9.0-2': 'b7142e568178cdd6ab1b742dcb65e0441a32b50c',
+}
+
 export class MlVersion {
   major: number
   minor: number

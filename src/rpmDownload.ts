@@ -7,7 +7,10 @@ import * as tough from 'tough-cookie'
 const through2 = require('through2')
 
 import { HashMap } from './util'
-import { MlVersion } from './version'
+import {
+  MlVersion,
+  sha1
+} from './version'
 import { ProgressFollower } from './progressTracker'
 
 let notifyFreq = 10
@@ -22,18 +25,18 @@ export interface DevCreds {
  * most recent of each major release, so need to calculate functional shas
  * and maintain a list of known functional, if not the official shas
  */
-// function getHasher(hash: crypto.Hash) {
-//   return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
-//     const buffer = Buffer.isBuffer(data) ?
-//         data :
-//         new Buffer(data, enc)
-//     hash.update(buffer)
-//     this.push(data)
-//     cb()
-//   }, function(cb: Function) {
-//     cb()
-//   })
-// }
+function getHasher(hash: crypto.Hash) {
+  return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
+    const buffer = Buffer.isBuffer(data) ?
+        data :
+        new Buffer(data, enc)
+    hash.update(buffer)
+    this.push(data)
+    cb()
+  }, function(cb: Function) {
+    cb()
+  })
+}
 
 export function downloadRpm(options: {
   targetDirectory: string,
@@ -90,11 +93,7 @@ export function downloadRpm(options: {
         let myTime: Date
         fsx.mkdirpSync(path.dirname(filename))
 
-        // const hasher = getHasher(hash)
-        // got(`https://developer.marklogic.com/download/${versionToDownload.rpmName}.sha1`, {
-        //   headers: { 'cookie': cookie.cookieString() },
-        // })
-        // const declaredSha = shaResp.body
+        const hasher = getHasher(hash)
 
         const anyGot = <any>got // typings don't match reality on master re the stream function
         anyGot.stream(uri, {
@@ -130,10 +129,24 @@ export function downloadRpm(options: {
         .on('error',  /* istanbul ignore next */ (err: Error) => {
           rej(new Error(`Errored trying to download the .rpm file: ${err.stack}`))
         })
-        .pipe(createWriteStream(filename))
-        // .pipe(hasher).pipe(createWriteStream(filename))
+        .pipe(hasher).pipe(createWriteStream(filename))
         .on('finish', () => {
           const sha = hash.digest('hex')
+          if (
+            sha1[options.version.toString()] &&
+            sha1[options.version.toString()] !== sha
+          ) {
+            throw new Error(
+              `Checksum failed. Expected ${sha1[options.version.toString()]}, ` +
+              ` calculated ${sha}`
+            )
+          }
+          else {
+            options.progressFollower(undefined)
+            options.progressFollower(
+              `Checksum checks. ${sha1[options.version.toString()]}, ${sha}`
+            )
+          }
           // printing the calculated sha without knowning what it was supposed
           // to be would be pretty cruel
           options.progressFollower(undefined)
