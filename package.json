@@ -1,6 +1,10 @@
 {
   "name": "mldock",
   "description": "NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+",
+  "keywords": [
+    "marklogic",
+    "docker"
+  ],
   "author": "Daphne Maddox <laurelnaiad@gmail.com>",
   "publisher": "laurelnaiad",
   "license": "MIT",
