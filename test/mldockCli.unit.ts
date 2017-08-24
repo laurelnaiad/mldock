@@ -9,6 +9,7 @@ import * as sinon from 'sinon'
 import * as cli from '../src/cli/cli'
 import * as downloadCli from '../src/cli/cli-download'
 import * as buildCli from '../src/cli/cli-build'
+import * as runCli from '../src/cli/cli-run'
 import * as handlers from '../src/cli/handlers'
 
 import * as util from './util.unit'
@@ -21,7 +22,9 @@ import {
   defaultFollower
 } from '../src'
 
-function runCli(args: string[]): Promise<string> {
+const containerName = 'test-mldock-cli'
+
+function spawnCli(args: string[]): Promise<string> {
   const cliPath = path.resolve('build/src/cli/cli.js')
   const nycPath = path.resolve('node_modules/.bin/nyc')
   return new Promise((res, rej) => {
@@ -156,10 +159,15 @@ describe('cli', function () {
       ]
       return fsx.remove(util.testDownloadDir)
       .then(() => fsx.mkdirp(util.testDownloadDir))
-      .then(() => runCli(downloadArgs))
-      .then(() => runCli(buildArgs))
+      .then(() => spawnCli(downloadArgs))
+      .then(() => spawnCli(buildArgs))
       .then(() => isImageOverridden(context))
-      .then(() => util.createBasicHost(context.mldock, context.version, defaultFollower))
+      .then(() => util.createBasicHost(
+        context.mldock,
+        context.version,
+        containerName,
+        defaultFollower
+      ))
       .then((ct) => context.mldock.startHostHealthy(ct.id!, 30, defaultFollower))
       .then((ct) => liveContainer = ct)
     })
@@ -228,111 +236,175 @@ describe('cli', function () {
       sandbox.restore()
     })
 
-    it('download should error if missing email', function () {
-      util.speedFactor(this, 8)
-      const missingEmailParams = [
-        path.resolve('build/src/cli/cli-download.js'),
-        'download',
-        '-o',
-        '-d',
-        util.testDownloadDir,
-        '-p',
-        process.env.MARKLOGIC_DEV_PASSWORD!,
-        context.version.toString()
-      ]
-      const prog = downloadCli.downloadProgram()
-      return cli.runProgram(
-        prog,
-        missingEmailParams,
-        downloadCli.downloadCmd
-      )
-      .then(() => {
-        assert(false, 'should error running program with bad args')
-      }, (err) => {
-        expect(ehStub.callCount).to.equal(1)
-        expect((ehStub.firstCall.args[0] as Error).message).to.match(
-          /The `download` action requires/
+    describe('download', function () {
+      it('should error if missing email', function () {
+        util.speedFactor(this, 8)
+        const missingEmailParams = [
+          path.resolve('build/src/cli/cli-download.js'),
+          'download',
+          '-o',
+          '-d',
+          util.testDownloadDir,
+          '-p',
+          process.env.MARKLOGIC_DEV_PASSWORD!,
+          context.version.toString()
+        ]
+        const prog = downloadCli.downloadProgram()
+        return cli.runProgram(
+          prog,
+          missingEmailParams,
+          downloadCli.downloadCmd
         )
+        .then(() => {
+          assert(false, 'should error running program with bad args')
+        }, (err) => {
+          expect(ehStub.callCount).to.equal(1)
+          expect((ehStub.firstCall.args[0] as Error).message).to.match(
+            /The `download` command requires/
+          )
+        })
+      })
+
+      it('should error if bad credentials', function () {
+        util.speedFactor(this, 8)
+        const badCredentials = [
+          path.resolve('build/src/cli/cli-download.js'),
+          'download',
+          '-d',
+          util.testDownloadDir,
+          '-o',
+          '-e',
+          'joe@example.com',
+          '-p',
+          'bad password',
+          context.version.toString()
+        ]
+        const prog = downloadCli.downloadProgram()
+        return cli.runProgram(
+          prog,
+          badCredentials,
+          downloadCli.downloadCmd
+        )
+        .then(() => {
+          assert(false, 'should error running program with bad args')
+        }, (err) => {
+          expect(err.message).to.match(/Bad email/)
+        })
       })
     })
 
-    it('download should error if bad credentials', function () {
-      util.speedFactor(this, 8)
-      const badCredentials = [
-        path.resolve('build/src/cli/cli-download.js'),
-        'download',
-        '-d',
-        util.testDownloadDir,
-        '-o',
-        '-e',
-        'joe@example.com',
-        '-p',
-        'bad password',
-        context.version.toString()
-      ]
-      const prog = downloadCli.downloadProgram()
-      return cli.runProgram(
-        prog,
-        badCredentials,
-        downloadCli.downloadCmd
-      )
-      .then(() => {
-        assert(false, 'should error running program with bad args')
-      }, (err) => {
-        expect(err.message).to.match(/Bad email/)
+    describe('build', function () {
+      it('should error if insufficient source params', function () {
+        util.speedFactor(this, 8)
+        const missingEmail = [
+          path.resolve('build/src/cli/cli-build.js'),
+          'build',
+          '-p',
+          'the problem is the missing email address',
+          '-o',
+          context.version.toString()
+        ]
+        const prog = buildCli.buildProgram()
+        return cli.runProgram(
+          prog,
+          missingEmail,
+          buildCli.buildCmd
+        )
+        .then(() => {
+          assert(false, 'should error running program with bad args')
+        }, (err) => {
+          expect(err.message).to.match(/The `build` command requires either/)
+        })
+      })
+
+      it('should error if file not found', function () {
+        util.speedFactor(this, 8)
+        const missingFile = [
+          path.resolve('build/src/cli/cli-build.js'),
+          'build',
+          '-f',
+          'not-a-real-file.rpm',
+          '-o',
+          context.version.toString()
+        ]
+        const prog = buildCli.buildProgram()
+        return cli.runProgram(
+          prog,
+          missingFile,
+          buildCli.buildCmd
+        )
+        .then(() => {
+          assert(false, 'should error running program with bad args')
+        }, (err) => {
+          expect(err.message).to.match(/File not found/)
+        })
       })
     })
 
-    it('build should error if insufficient source params', function () {
-      util.speedFactor(this, 8)
-      const missingEmail = [
-        path.resolve('build/src/cli/cli-build.js'),
-        'build',
-        '-p',
-        'the problem is the missing email address',
-        '-o',
-        context.version.toString()
-      ]
-      const prog = buildCli.buildProgram()
-      return cli.runProgram(
-        prog,
-        missingEmail,
-        buildCli.buildCmd
-      )
-      .then(() => {
-        assert(false, 'should error running program with bad args')
-      }, (err) => {
-        expect(err.message).to.match(/The `build` action requires either/)
+    describe('run', function () {
+      it('should error if container name not given', function () {
+        util.speedFactor(this, 8)
+        const missingName = [
+          path.resolve('build/src/cli/cli-run.js'),
+          'run',
+          '-e',
+          process.env.MARKLOGIC_DEV_EMAIL!,
+          '-p',
+          process.env.MARKLOGIC_DEV_PASSWORD!,
+          context.version.toString()
+        ]
+        const prog = runCli.buildProgram()
+        return cli.runProgram(
+          prog,
+          missingName,
+          runCli.runCmd
+        )
+        .then(() => {
+          assert(false, 'should error running program with bad args')
+        }, (err) => {
+          expect(err.message).to.match(/The `run` command requires the `contName` option/)
+        })
       })
-    })
 
-    it('build should error if file not found', function () {
-      util.speedFactor(this, 8)
-      const missingFile = [
-        path.resolve('build/src/cli/cli-build.js'),
-        'build',
-        '-f',
-        'not-a-real-file.rpm',
-        '-o',
-        context.version.toString()
-      ]
-      const prog = buildCli.buildProgram()
-      return cli.runProgram(
-        prog,
-        missingFile,
-        buildCli.buildCmd
-      )
-      .then(() => {
-        assert(false, 'should error running program with bad args')
-      }, (err) => {
-        expect(err.message).to.match(/File not found/)
+      it('should call runHost with the expected params', function () {
+        util.speedFactor(this, 8)
+
+        const fStub = sandbox.stub(MlDock.prototype, 'runHost').callsFake((options: {
+          version: string,
+          rpmSource: { email: string, password: string},
+          containerName: string,
+        }) => Promise.resolve({ id: '' }))
+
+        const okParams = [
+          path.resolve('build/src/cli/cli-run.js'),
+          'run',
+          '-n',
+          'mycontainer',
+          '-e',
+          process.env.MARKLOGIC_DEV_EMAIL!,
+          '-p',
+          process.env.MARKLOGIC_DEV_PASSWORD!,
+          context.version.toString()
+        ]
+        const prog = runCli.buildProgram()
+        return cli.runProgram(
+          prog,
+          okParams,
+          runCli.runCmd
+        )
+        .then(() => (<any>expect(fStub.firstCall.args)).to.deepNestedInclude({
+          containerName: 'myContainer',
+          email: process.env.MARKLOGIC_DEV_EMAIL!,
+          password: process.env.MARKLOGIC_DEV_PASSWORD!
+        }))
+        .then(() => fStub.restore())
       })
     })
 
     describe('error handlers', function () {
       it('process exits on error', function () {
         util.speedFactor(this, 8)
-        return runCli(['download', '-adsfaf', 'notwork'])
+        return spawnCli(['download', '-adsfaf', 'notwork'])
         .then(
           () => assert(false, 'should error on no args'),
           (err) => {}
@@ -340,7 +412,7 @@ describe('cli', function () {
       })
       it('handles bad command', function () {
         util.speedFactor(this, 8)
-        return runCli(['notacommand'])
+        return spawnCli(['notacommand'])
         .then(
           () => assert(false, 'should error on no args'),
           (err) => {}

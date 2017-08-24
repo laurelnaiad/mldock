@@ -88,7 +88,7 @@ export class MlDock extends EventEmitter {
    */
   downloadVersion(options: {
     version: string | MlVersion,
-    targetDirectory: string,
+    targetDir: string,
     credentials: DevCreds,
     overwrite?: boolean,
     progressFollower?: ProgressFollower
@@ -100,7 +100,7 @@ export class MlDock extends EventEmitter {
       ...myOpts
     } = options
     let overwriteTest: Promise<boolean>
-    const fname = path.resolve(options.targetDirectory, v.rpmName)
+    const fname = path.resolve(options.targetDir, v.rpmName)
     return (() => {
       if (fsx.existsSync(fname)) {
         if (!overwrite) {
@@ -153,6 +153,128 @@ export class MlDock extends EventEmitter {
   }
 
   /**
+   * Sort of like docker run -- this function goes from zero to a running host
+   * of the specified version, or just runs a host container or
+   * returns a reference to a running container.
+   *
+   * * If the MarkLogic version image is not not present, downloads/builds version.
+   * * If the host container (by name) is not present, creates the container.
+   * * If the host container is not running, runs the host container and waits
+   * for it to emit a `healthy` event.
+   * * Inspects host, resolves to `ContainerRuntimeRef`.
+   *
+   * If the container is already running, then no assessment of its health is
+   * made.
+   */
+  runHost(options: {
+    containerName: string,
+    version: string | MlVersion,
+    /**
+     * If given, this function should create a host container and result to a
+     * `Docker.Container` for the container. The container *must* be
+     * configured  with a health command that is consistent with the
+     * `hostHealthyTimeout` (default is 10 seconds).
+     *
+     * If not specified, then a basic host is configured to provide access
+     * to an unininitialized server is created. (In particular, its healthcheck
+     * function will only work properly as long as marklogic is not yet bootstrapped
+     * with security.)
+     *
+     */
+    hostCreate?: (
+      version: MlVersion,
+      containerName: string,
+      progressFollower: ProgressFollower
+    ) => Promise<Docker.Container>,
+    /**
+     * **in seconds**
+     *
+     * Time to wait for host to become healthy after running container
+     * @default: 10
+    */
+    hostHealthyTimeout?: number,
+    /** either path to rpm file or credentials */
+    rpmSource?: string | DevCreds,
+    baseImage?: string,
+    progressFollower?: ProgressFollower
+  }): Promise<ContainerRuntimeRef> {
+    const {
+      containerName,
+      hostCreate,
+      hostHealthyTimeout,
+      rpmSource,
+      ...myOpts
+    } = options
+    const progressFollower = getProgressFollower(options.progressFollower)
+    const version = this.getVersionObject(options.version)
+    return this.client.isVersionPresent(version, progressFollower)
+    .then((isPresent) => {
+      if (!isPresent) {
+        if (typeof rpmSource === 'string' || (<DevCreds>rpmSource).email) {
+          return this.buildVersion({
+            ...myOpts,
+            rpmSource: <DevCreds>rpmSource
+          }).then(() => {})
+        }
+        else {
+          throw new Error(
+            `An image for MarkLogic ${version.toString()} is not present, and ` +
+            `an \`rpmSource\` was not given`
+          )
+        }
+      }
+      else {
+        return Promise.resolve()
+      }
+    })
+    .then(() => this.client.listContainers({ name: [ containerName ] }))
+    .then((containers) => {
+      if (!containers.length) {
+        if (hostCreate) {
+          return hostCreate(version, containerName, progressFollower)
+        }
+        else {
+          const oneSecondInNano = 1000 * 1000000
+          return this.createHostContainer({
+            version,
+            containerName,
+            healthCheck: {
+              Test: [
+                'CMD-SHELL',
+                `curl --silent --fail http://localhost:8001/admin/v1/timestamp || exit 1`
+              ],
+              Interval: oneSecondInNano,
+              Timeout: oneSecondInNano,
+              Retries: 12,
+              StartPeriod: oneSecondInNano
+            },
+            progressFollower
+          })
+        }
+      }
+      else {
+        return Promise.resolve(this.client.getContainer(containerName))
+      }
+    })
+    .then((ct) => {
+      return this.hostInspect(containerName)
+      .then((ctRtRef): Promise<any> => {
+        if (!ctRtRef.containerInspect.State.Running) {
+          return this.startHostHealthy(
+            containerName,
+            hostHealthyTimeout || 10,
+            progressFollower
+          ).then(() => ct)
+        }
+        else {
+          return Promise.resolve(ct)
+        }
+      })
+    })
+    .then((ct) => this.hostInspect(ct.id))
+  }
+
+  /**
    * Stops & removes all containers using a version images, then removes the version image.
    */
   removeVersion(
@@ -165,7 +287,29 @@ export class MlDock extends EventEmitter {
   }
 
   /**
-   * Stops & removes all containers using mldock images, then the containers and images.
+   * Stops (if it is running) a host container & remove it.
+   */
+  removeHost(
+    containerRef: string | ContainerRuntimeRef,
+    progressFollower?: ProgressFollower
+  ): Promise<void> {
+    progressFollower = getProgressFollower(progressFollower)
+    let containerLocated: Promise<ContainerRuntimeRef>
+    if (typeof containerRef === 'string') {
+      containerLocated = this.hostInspect(containerRef)
+    }
+    else {
+      containerLocated = Promise.resolve(containerRef)
+    }
+    return containerLocated.then((ctRtRef) => ctRtRef.containerInspect.State.Running ?
+        ctRtRef.container.stop().then(() => ctRtRef) :
+        Promise.resolve(ctRtRef)
+    )
+    .then((ctRtRef) => ctRtRef.container.remove())
+  }
+
+  /**
+   * Stops & removes all containers using mldock images, removes images.
    * Does not remove base images.
    */
   removeAll(

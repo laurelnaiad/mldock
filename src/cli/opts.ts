@@ -1,5 +1,5 @@
 export const repo = [
-  '-r, --repo <respository prefix>',
+  '-r, --repo <repository prefix>',
   'Prefix to use in naming images/containers in docker; defaults to \`mldock\`',
   'mldock'
 ]
@@ -32,6 +32,14 @@ export const overwriteFile = [
   'Overwrite existing file, if present',
 ]
 export const baseImage = [
-  '-b, --base',
+  '-b, --base <image name or id>',
   'Substitute base image in place of CentOS official image',
+]
+export const containerName = [
+  '-n, --contName <container name>',
+  'Name of the host container.',
+]
+export const hostHealthyTime = [
+  '-h, --hhTime <timeout seconds>',
+  'Time in seconds to wait for host to become healthy',
 ]

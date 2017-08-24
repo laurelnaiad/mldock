@@ -29,10 +29,12 @@ export function getContext(): TestContext {
 export function createBasicHost(
   mldock: MlDock,
   version: MlVersion,
+  containerName: string,
   progressFollower: ProgressFollower
 ): Promise<Docker.Container> {
   const oneSecondInNano = 1000 * 1000000
   return mldock.createHostContainer({
+    containerName,
     version,
     healthCheck: {
       Test: [

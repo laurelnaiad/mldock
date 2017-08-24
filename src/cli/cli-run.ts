@@ -8,49 +8,58 @@ import {
   DevCreds,
 } from '../index'
 
-export function buildCmd(version: string, options: {
+export function runCmd(version: string, options: {
   repo: string,
+  contName?: string,
+  hhTime?: number,
   rpmFile?: string,
   email?: string,
   baseImage?: string,
   password?: string,
-  overwrite?: boolean
 }): Promise<string> {
-  if (
-    !(options.rpmFile || (options.password && options.email)) ||
-    options.rpmFile && (options.password || options.email)
-  ) {
+  if (!(options.contName)) {
     return Promise.reject(new Error(
-      'The `build` command requires either the `rpmFile` or the `email` and `password` options to be set.'
+      'The `run` command requires the `contName` option to be set.'
     ))
   }
   const rpmSource = options.rpmFile ? options.rpmFile : <DevCreds>options
   const currentStep = { step: undefined }
+  const {
+    repo,
+    hhTime,
+    rpmFile,
+    email,
+    password,
+    contName,
+    ...myOpts
+  } = options
   const mld = new MlDock({ repo: options.repo })
-  return mld.buildVersion({
+  return mld.runHost({
+    ...myOpts,
     version,
     rpmSource,
-    overwrite: options.overwrite,
-    baseImage: options.baseImage,
+    containerName: contName,
+    hostHealthyTimeout: hhTime,
     progressFollower: cliFollower.bind(cliFollower, currentStep)
   })
+  .then(ctRtRef => ctRtRef.id)
 }
 
 export function buildProgram() {
   const program = new Command()
   program
   .option(...opts.repo)
+  .option(...opts.containerName)
+  .option(...opts.hostHealthyTime)
   .option(...opts.rpmFile)
   .option(...opts.email)
-  .option(...opts.baseImage)
   .option(...opts.password)
-  .option(...opts.overwriteImage)
-
+  .option(...opts.baseImage)
   return program
 }
 
 cli.liftProgram(
   buildProgram,
-  buildCmd,
+  runCmd,
   module,
 )

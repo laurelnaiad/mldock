@@ -51,7 +51,7 @@ function mldockProgram() {
   .version(getVersion())
 
   .command(
-    'download <version> <directory>',
+    'download <version>',
     `download the specified MarkLogic Server version into the specified directory.`,
   ).alias('d')
 
@@ -59,6 +59,11 @@ function mldockProgram() {
     'build <version>',
     `build the specified MarkLogic Server version.`
   ).alias('b')
+
+  .command(
+    'run <version>',
+    `Download/build/run the specified MarkLogic Server version, or just run it if is present.`
+  ).alias('r')
 
   return program
 }

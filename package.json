@@ -88,9 +88,6 @@
       "lcov",
       "html"
     ],
-    "exclude": [
-      "**/*.d.ts"
-    ],
     "require": [
       "source-map-support/register"
     ],

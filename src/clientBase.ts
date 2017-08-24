@@ -27,8 +27,10 @@ export type DockerResourceId = string
 export interface ContainerRuntimeRef {
   id: string,
   ports: { [port: string]: number },
+  container: Docker.Container,
   containerInspect: Docker.ContainerInspectInfo
 }
+
 export const ML_RUN_CMD = ['/bin/bash', '-c', '/usr/local/bin/mlrun.sh']
 export const DATA_DIR = '/var/opt/MarkLogic'
 export const TEMP_DIR = path.join(__dirname, '.temp')
@@ -55,7 +57,7 @@ export class MlDockClientBase extends Docker {
     progressFollower: ProgressFollower
   }): Promise<Docker.Container> {
     const param = {
-      name: options.containerName,
+      //  note not trying to name the container here, see below
       Image: options.imageId,
       Tty: true,
       Detach: true,
@@ -77,6 +79,13 @@ export class MlDockClientBase extends Docker {
       Promise.resolve()
     )
     .then(() => this.createContainer(param))
+    // I think I'm working around a dockerode/engine api mismatchwherein docker api has
+    // moved the name in create container to a query param?
+    .then((ct) => {
+      return options.containerName ?
+          ct.rename({ name: options.containerName }).then(() => ct) :
+          Promise.resolve(ct)
+    })
   }
 
   protected getIngoredFiles(directory: string, myFiles: string[]) {
@@ -135,14 +144,16 @@ export class MlDockClientBase extends Docker {
     progressFollower: ProgressFollower
   ) {
     progressFollower(`removing container ${id}`)
-    const cont = this.getContainer(id)
-    return cont.inspect().then(inspect => {
-      if (inspect.State.Running) {
-        return cont.stop()
-        .then(() => cont.remove())
-      }
-      else {
-        return cont.remove()
+    return this.hostInspect(id)
+    .then((ctRtRef) => {
+      if (ctRtRef) {
+        if (ctRtRef.containerInspect.State.Running) {
+          return ctRtRef.container.stop()
+          .then(() => ctRtRef.container.remove())
+        }
+        else {
+          return ctRtRef.container.remove()
+        }
       }
     })
     .then(() => progressFollower(undefined))
@@ -157,4 +168,34 @@ export class MlDockClientBase extends Docker {
     return img.remove()
     .then(() => progressFollower(undefined))
   }
+
+  hostInspect(
+    containerId: string,
+  ): Promise<ContainerRuntimeRef> {
+    return new Promise((res, rej) => {
+      const container = this.getContainer(containerId)
+      container.inspect().then(containerInspect => {
+        const portsMap: HashMap<number> = Object.keys(containerInspect.NetworkSettings.Ports).reduce((acc, p) => {
+          const port = p.replace(/\/tcp/, '')
+          const mapped = parseInt((<any>containerInspect.NetworkSettings.Ports[p])[0].HostPort)
+          return Object.assign(acc, { [port]: mapped })
+        }, {})
+        res({
+          id: containerId,
+          ports: portsMap,
+          container,
+          containerInspect
+        })
+      }, (err: any) => {
+        /* istanbul ignore else */
+        if (err.statusCode === 404) {
+          res()
+        }
+        else {
+          rej(new Error(err))
+        }
+      })
+    })
+  }
+
 }

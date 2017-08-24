@@ -39,7 +39,7 @@ function getHasher(hash: crypto.Hash) {
 }
 
 export function downloadRpm(options: {
-  targetDirectory: string,
+  targetDir: string,
   version: MlVersion,
   credentials: DevCreds,
   progressFollower: ProgressFollower
@@ -50,7 +50,7 @@ export function downloadRpm(options: {
     asset: options.version.downloadUrl
   }
   options.progressFollower(
-    `downloading version ${options.version.toString()} to ${options.targetDirectory}  `
+    `downloading version ${options.version.toString()} to ${options.targetDir}  `
   )
   options.progressFollower(undefined, 'logging in')
 
@@ -88,7 +88,7 @@ export function downloadRpm(options: {
           throw new Error(`Got non-success trying to get download url: ${resp.statusMessage}: ${resp.statusMessage}`)
         }
         const uri = JSON.parse(resp.body).path
-        const filename = path.join(options.targetDirectory, options.version.rpmName)
+        const filename = path.join(options.targetDir, options.version.rpmName)
         let progressPercent = 0
         let myTime: Date
         fsx.mkdirpSync(path.dirname(filename))

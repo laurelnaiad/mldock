@@ -1,19 +1,9 @@
 {
-  "buildOnSave": false,
-  "compileOnSave": true,
-  "indentSize": 2,
-  "tabSize": 2,
+  "extends": "./src/tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2015",
-    "baseUrl": ".",
-    "outDir": "./build",
-    "strict": true,
-    "sourceMap": true
+    "outDir": "./build"
   },
   "include": [
-    "src/**/*.ts",
     "test/**/*.ts"
   ]
 }

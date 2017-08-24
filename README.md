@@ -4,7 +4,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/laurelnaiad/mldock/master.svg)](https://codecov.io/gh/laurelnaiad/mldock)
 [![Greenkeeper badge](https://badges.greenkeeper.io/laurelnaiad/mldock.svg)](https://greenkeeper.io/)
 ---
-> NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+
+> NodeJS/TypeScript library/CLI -- downloads MarkLogic rpms and builds Docker images hosting MarkLogic Server 8+
 
 ## Description
 
@@ -13,7 +13,8 @@ _mldock_ was conceived as a means of building Docker images to host MarkLogic Se
 mldock:
 
 * downloads MarkLogic .rpm files from MarkLogic using the developer credentials you bring;
-* builds Docker images that run MarkLogic Server.
+* builds Docker images that run MarkLogic Server;
+* helps run image as containers.
 
 It does very little beyond that, but to allow for substitution of fancier baselines _underneath_ the MarkLogic image.
 
@@ -25,7 +26,7 @@ Prerequisites:
 * a free [MarkLogic Developer Account](https://developer.marklogic.com/people/signup)
 
 ```bash
-npm install mldock # can be also be global, docker doesn't care
+npm install -g mldock # (local installs are fine, too)
 ```
 
 `mldock -h` gives help for the command-line interface, and see typings for the barest of library api assistance.
@@ -36,7 +37,7 @@ npm install mldock # can be also be global, docker doesn't care
 
 Download/build image in one step:
 ```bash
-mldock build -r my-ml-proj -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD 8.0-6.4
+mldock build -r my-ml-proj -e $MLDEV_USER -p $MLDEV_PW 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
 #
 # my-ml-proj-marklogic:8.0.6.4
@@ -44,7 +45,7 @@ mldock build -r my-ml-proj -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD 8.0
 
 Or seperately:
 ```bash
-mldock download -e $MARKLOGIC_DEV_USER -p $MARKLOGIC_DEV_PASSWORD -d ./downloaded 8.0-6.4
+mldock download -e $MLDEV_USER -p $MLDEV_PW -d ./downloaded 8.0-6.4
 # => ...(a rolling log ensues and lasts a while)
 # downloading version 8.0-6.4 to ./downloaded  ...done
 #
@@ -60,6 +61,11 @@ mldock build -r my-ml-proj -f downloaded/MarkLogic-RHEL7-8.0-6.4.x86_64.rpm 8.0-
 # my-ml-proj-marklogic:8.0.6.4
 ```
 
+Or do it all:
+```bash
+mldock run --n my-container -e $MLDEV_USER -p $MLDEV_PW 8.0-6.4
+```
+
 ### The `MlDock` class:
 
 ```typescript
@@ -68,8 +74,8 @@ import {
 } from 'mldock'
 
 const creds = {
-  email: process.env.MARKLOGIC_DEV_USER,
-  password: process.env.MARKLOGIC_DEV_PASSWORD
+  email: process.env.MLDEV_USER,
+  password: process.env.MLDEV_PW
 }
 
 /**
@@ -77,7 +83,10 @@ const creds = {
  * given credentials.
  */
 const mldock = new MlDock({ repo: 'my-ml-proj' })
-mldock.buildVersion('9.0-2', creds).then((imageName) => {
+mldock.buildVersion({
+  version: '9.0-2',
+  rpmSource: creds
+}).then((imageName) => {
   console.log(`built ${imageName}`)
   // => built my-ml-proj-marklogic:9.0.2
 })
@@ -115,7 +124,11 @@ import {
   MlDock,
 } from 'mldock'
 
-mldock.buildVersion('8.0-6.4', creds, defaultFollower).then((imageName) => {
+mldock.buildVersion({
+  version: '8.0-6.4',
+  rpmSource: creds,
+  progressFollower: defaultFollower
+}).then((imageName) => {
   //...
 })
 ```
@@ -153,6 +166,12 @@ mldock.buildVersion(version, creds, defaultFollower)
   // { '8000': 39472, '8001': 38497, '8002': 38434 }
 })
 ```
+
+The `runHost` function is quite similar to `buildVersion`, except:
+
+* the container needs a name
+* the concept of "overwriting" the image is out -- instead of the image or a
+container by the given name exists, it's used
 
 ## Images
 

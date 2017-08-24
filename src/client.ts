@@ -9,7 +9,10 @@ import {
 import { LibOptions } from './mldock'
 import { DevCreds } from './rpmDownload'
 import { ProgressFollower } from './progressTracker'
-import { MlVersion } from './version'
+import {
+  MlVersion,
+  sha1
+} from './version'
 import {
   TEMP_DIR,
   MlDockClientBase,
@@ -157,6 +160,7 @@ export class MlDockClient extends MlDockClientBase {
         }
         const buildargs = {
           version: options.version.toDotString(),
+          sha: sha1[options.version.toString()],
           osImage,
           rpmFile,
           email: (<DevCreds>rpmSource).email,
@@ -186,34 +190,6 @@ export class MlDockClient extends MlDockClientBase {
     })
   }
 
-  hostInspect(
-    containerId: string,
-  ): Promise<ContainerRuntimeRef> {
-    return new Promise((res, rej) => {
-      const cont = this.getContainer(containerId)
-      cont.inspect().then(containerInspect => {
-        const portsMap: HashMap<number> = Object.keys(containerInspect.NetworkSettings.Ports).reduce((acc, p) => {
-          const port = p.replace(/\/tcp/, '')
-          const mapped = parseInt((<any>containerInspect.NetworkSettings.Ports[p])[0].HostPort)
-          return Object.assign(acc, { [port]: mapped })
-        }, {})
-        console.log(JSON.stringify(containerInspect, null, 2))
-        res({
-          id: containerId,
-          ports: portsMap,
-          containerInspect
-        })
-      }, (err: any) => {
-        /* istanbul ignore else */
-        if (err.statusCode === 404) {
-          res()
-        }
-        else {
-          rej(new Error(err))
-        }
-      })
-    })
-  }
 
   removeMlDockResources(
     version: MlVersion | undefined,

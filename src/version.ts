@@ -28,6 +28,9 @@ export class MlVersion {
   patch?: number
 
   constructor(versionStr: string) {
+    if (!versionStr) {
+      throw new Error('versionStr is required in the MlVersion constructor.')
+    }
     const regex805Beyond = /^[^\-]+\-(?:[^\d]*\d+)\-(\d+)\.(\d+)\-(\d+)(?:\.(\d))?/
     const regexPre805 = /^[^\-]+-(\d+)\.(\d+)\-(\d+)(?:\.(\d))?/
     const justVersion = /^(?:[^\-\d]+\-)?(\d+)\.(\d+)\-(\d+)(?:\.(\d))?/
@@ -37,24 +40,30 @@ export class MlVersion {
         fname.match(regex805Beyond) ||
         fname.match(regexPre805) ||
         fname.match(justVersion)
-    const versionParts: string[] = Array.prototype.slice.call(matches, 0)
-    versionParts.forEach((p, i) => {
-      const intP = parseInt(p)
-      switch (i) {
-        case 1:
-          this.major = intP
-          break
-        case 2:
-          this.minor = intP
-          break
-        case 3:
-          this.revision = intP
-          break
-        case 4:
-          this.patch = intP
-          break
-      }
-    })
+
+    try {
+      const versionParts: string[] = Array.prototype.slice.call(matches, 0)
+      versionParts.forEach((p, i) => {
+        const intP = parseInt(p)
+        switch (i) {
+          case 1:
+            this.major = intP
+            break
+          case 2:
+            this.minor = intP
+            break
+          case 3:
+            this.revision = intP
+            break
+          case 4:
+            this.patch = intP
+            break
+        }
+      })
+    }
+    catch (err) {
+      throw new Error(`Cannot parse version string, ${versionStr}. ${err.stack}`)
+    }
   }
   get compatibleCentos() {
     return this.major === 8 && this.minor >= 0 && this.revision >= 4 || this.major > 8 ?

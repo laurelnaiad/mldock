@@ -16,7 +16,7 @@ export function downloadCmd(version: string, options: {
 }): Promise<string> {
   if (!(options.dir && options.password && options.email)) {
     return Promise.reject(new Error(
-      'The `download` action requires the `dir`, `email` and `password` options to be set.'
+      'The `download` command requires the `dir`, `email` and `password` options to be set.'
     ))
   }
   const currentStep = { step: undefined }
@@ -31,7 +31,7 @@ export function downloadCmd(version: string, options: {
     ...myOpts,
     version,
     credentials: { email: email!, password: password! },
-    targetDirectory: options.dir!,
+    targetDir: options.dir!,
     progressFollower: cliFollower.bind(cliFollower, currentStep)
   })
 }
