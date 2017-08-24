@@ -44,6 +44,7 @@ deploy:
       secure: PEYtm4jVwnqm6ocDMhtDlEulSremiG3VHwBwV9i/1NHCyP/8uo4i0JlYd0B+rhJo6lqP6uL0Iw/oghHo5IkAgWXVT02RiV1FVvICA2aCiIdO1Y85xmMH1x9aXJ1WenJEy/niFqVV7M+IvPOPH4HAY/ApnLvewOsalm8h4S9MG8UMzewE8rjsM9ZvS+8fCxmFa65jTUVBzeoiXwtZGggcmlO3hiuSjwERoDaGsikKXuVKLp2p6/vhTf4iNdw4ITazy+7EHTtFRLctR9cn1Yu8Pvt0OTGdb5fNpzDyfMgCHzThXCPMPGpnBWWTgJ/Sc89l53eC9VgUxu7lfMHM/zMjoWFKBAyYhp3kkOrnrFTtgS2FyfVOHJS02I5JY4KqsxzIPFfgi1nF91pAugU1gC9ECXqOrd1JMfjEl8Gx0Rkgn4QiRXyhgt5tBpqcyWiwWskI7m4Fut6NbS0BCxm89T+r4v/DcAsD6nW1NmCj6JQZYege6buaeidnoW26vj/cHKMFplMQA/9G96fqlno7VhXUtNDNAU5+iHG4a8el6aBhG6OKhtbely9MqzBnIOf2ckD+rY91jzosvSotaU/rnmctBHArTuiQcC47OUvhIR0r7tP3BwEr6mfQK5+hqvhtpkelTl348w6DFcdKeYns4Kunomed+KBqhblNSU584UJ1xZ8=
     on:
       tags: true
+      all_branches: true
       node: '7'
       condition: $MARKLOGIC_VERSION = 9.0-2 && $DOCKER_VERSION = "17.06.1~ce-0~ubuntu"
   - provider: releases
@@ -54,5 +55,6 @@ deploy:
       secure: GOQvlLum9ms8/iPzXHTmTR0fXiyfyNNmBnPdD3gFgHf6+iSVSo95RqbpB6xmFlgqoWo9mbRLvt/QzefMIczg7i5sLW9uuxT4yzj62bKnQoxZ5/+jSlqpcQFqTVEs86PzLfdX8wcfsrRaEgFYUQVIHz3kM8a8uD2Be5CHZ5VziuzIt1tEbG7ll6X7qlLsNNxCRPS//qDOW8qFoues9FEqLCg5yMwmx9HGMC6wXyRzh3H3ViPTF/qmnK7RYQuTThPG8849jmcgaSP9/Pt5wOv/CgTRFffhikUwt7IJNwgqIeLvns0KQAtHHUACJcxWAZudOjTbxBB+9kzPCNW11HMPIuXox6ladC1cpQMpJxHLolr9C0vTL6/onWqkGKnf2Ht6ytoCblkOOavAAC95rLQcQ8pr7rYgGmaS1OWCXTZ7rneY7dJt20ngdRCEa4pUi7VZVDGTihIBca7waRfiqOtivhphQ6LQU+OyFa2pImLBll20OaYtJhnmqybxkRy5cmTJPzLW9RXjyIqTLMIPewUpRRNI06zfbJNckTXG1xOy/OO51WjuKmRhru7xtU+9HIqnm4x06k0swjn9sdux/w4DsGiFkD+3Cx9CDWags0IgHViVwgC/cFZHgGUTsN3Txa2p3u3G7MUQenZc0IhPthzpFwxDnDpE+sYOMeyhTRgzF1s=
     on:
       tags: true
+      all_branches: true
       node: '7'
       condition: $MARKLOGIC_VERSION = 9.0-2 && $DOCKER_VERSION = "17.06.1~ce-0~ubuntu"
