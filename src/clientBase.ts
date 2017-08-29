@@ -155,6 +155,10 @@ export class MlDockClientBase extends Docker {
           return ctRtRef.container.remove()
         }
       }
+    }, (err: any) => {
+      if (err.statusCode !== 404) {
+        throw new err
+      }
     })
     .then(() => progressFollower(undefined))
   }
@@ -186,16 +190,7 @@ export class MlDockClientBase extends Docker {
           container,
           containerInspect
         })
-      }, (err: any) => {
-        /* istanbul ignore else */
-        if (err.statusCode === 404) {
-          res()
-        }
-        else {
-          rej(new Error(err))
-        }
-      })
+      }, (err) => rej(err))
     })
   }
-
 }

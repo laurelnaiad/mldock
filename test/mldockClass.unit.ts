@@ -144,7 +144,10 @@ describe('MlDock class', function () {
         expect(ctRtRef.ports[8001]).to.be.ok
         return mldock.removeHost(ctRtRef)
         .then(() => mldock.hostInspect(containerName))
-        .then((ctrt) => expect(ctrt).to.be.undefined)
+        .then(
+          (ctrt) => assert(false),
+          (err: any) => expect(err.statusCode).to.equal(404)
+        )
       })
     })
 

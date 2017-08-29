@@ -3,11 +3,6 @@ import * as fsx from 'fs-extra'
 const chalk = require('chalk')
 const logUpdate = require('log-update')
 
-import {
-  MlDock,
-  DevCreds,
-  ContainerRuntimeRef
-} from '../index'
 import * as opts from './opts'
 import * as util from '../util'
 

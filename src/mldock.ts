@@ -214,7 +214,8 @@ export class MlDock extends EventEmitter {
           return this.buildVersion({
             ...myOpts,
             rpmSource: <DevCreds>rpmSource
-          }).then(() => {})
+          })
+          .then(() => this.inspectVersion(version))
         }
         else {
           throw new Error(
@@ -224,54 +225,68 @@ export class MlDock extends EventEmitter {
         }
       }
       else {
-        return Promise.resolve()
+        return this.inspectVersion(version)
       }
     })
-    .then(() => this.client.listContainers({ name: [ containerName ] }))
-    .then((containers) => {
-      if (!containers.length) {
-        if (hostCreate) {
-          return hostCreate(version, containerName, progressFollower)
+    .then((imageInspect) => {
+      return this.client.listContainers({
+        all: true,
+        filters: { name: [ `^/${containerName}$` ] }
+      })
+      .then((containers) => {
+        if (!containers.length) {
+          if (hostCreate) {
+            return hostCreate(version, containerName, progressFollower)
+          }
+          else {
+            const oneSecondInNano = 1000 * 1000000
+            return this.createHostContainer({
+              version,
+              containerName,
+              healthCheck: {
+                Test: [
+                  'CMD-SHELL',
+                  `curl --silent --fail http://localhost:8001/admin/v1/timestamp || exit 1`
+                ],
+                Interval: oneSecondInNano,
+                Timeout: oneSecondInNano,
+                Retries: 12,
+                StartPeriod: oneSecondInNano
+              },
+              progressFollower
+            })
+          }
         }
         else {
-          const oneSecondInNano = 1000 * 1000000
-          return this.createHostContainer({
-            version,
-            containerName,
-            healthCheck: {
-              Test: [
-                'CMD-SHELL',
-                `curl --silent --fail http://localhost:8001/admin/v1/timestamp || exit 1`
-              ],
-              Interval: oneSecondInNano,
-              Timeout: oneSecondInNano,
-              Retries: 12,
-              StartPeriod: oneSecondInNano
-            },
-            progressFollower
-          })
-        }
-      }
-      else {
-        return Promise.resolve(this.client.getContainer(containerName))
-      }
-    })
-    .then((ct) => {
-      return this.hostInspect(containerName)
-      .then((ctRtRef): Promise<any> => {
-        if (!ctRtRef.containerInspect.State.Running) {
-          return this.startHostHealthy(
-            containerName,
-            hostHealthyTimeout || 10,
-            progressFollower
-          ).then(() => ct)
-        }
-        else {
-          return Promise.resolve(ct)
+          return Promise.resolve(this.client.getContainer(containerName))
         }
       })
+      .then((ct) => {
+        return this.hostInspect(ct.id!)
+        .then((ctRtRef): Promise<any> => {
+          if (
+            ctRtRef.containerInspect.Config.Image !==
+            `${this.libOptions.repo}-marklogic:${version.toDotString()}`
+          ) {
+            throw new Error(
+            `Version mismatch -- a container ${containerName} exists, ` +
+            `based on a different base: ${ctRtRef.containerInspect.Config.Image}`
+            )
+          }
+          if (!ctRtRef.containerInspect.State.Running) {
+            return this.startHostHealthy(
+              containerName,
+              hostHealthyTimeout || 30,
+              progressFollower
+            ).then(() => ct)
+          }
+          else {
+            return Promise.resolve(ct)
+          }
+        })
+      })
+      .then((ct) => this.hostInspect(ct.id))
     })
-    .then((ct) => this.hostInspect(ct.id))
   }
 
   /**
