@@ -20,16 +20,8 @@ MLDOWNLOADURL=$(curl -s -X POST \
 
 echo ""
 echo "downloading MarkLogic from $MLDOWNLOADURL"
-
 wget -O $4 --progress=bar:force $MLDOWNLOADURL
 rm -f developer.marklogic.jar
-
-if [[ -n $5 ]]; then
-    SHA=$(sha1sum "$4" | awk '{print $1;}' )
-    if [[ $SHA -ne $5 ]]; then
-        echo "Checksum failed. Expected $5, calculated $SHA"
-        exit 1
-    else
-        echo "Checksum checks. $5, $SHA"
-    fi
-fi
+echo "Checksum check:"
+echo -n "${5}  /${4}" > "${4}.sha1"
+sha1sum -c "${4}.sha1"
