@@ -17,6 +17,8 @@ export const sha1: HashMap<string> = {
   // '8.0-6.5': undefined,
   '8.0-6.6': 'a81101f9e62739505cd43e824bfcc124c4263a66',
   '8.0-6.7': '7396a73a3cbc3d80d41112d98ea9f176cc203ef4',
+  // '8.0-7': '7396a73a3cbc3d80d41112d98ea9f176cc203ef4',
+  '8.0-7': 'de0d21085233450869d44aeec976edb1dac5531e',
   '9.0-1': '01e5a7ce3ee07c9acc98d69a649e8dc317b84740',
   '9.0-2': 'b7142e568178cdd6ab1b742dcb65e0441a32b50c',
 }
