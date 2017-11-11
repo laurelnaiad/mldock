@@ -226,12 +226,12 @@ export class MlDockClient extends MlDockClientBase {
         filters: {
           'event': [ 'health_status' ]
         }
-      }, (err: Error, stream: NodeJS.ReadableStream) => {
+      }, (err: Error, stream?: NodeJS.ReadableStream) => {
         let finished = false
         setTimeout(() => {
           if (!finished) {
             finished = true
-            stream.removeAllListeners()
+            stream && stream.removeAllListeners()
             rej(new Error(
               `Timed out after waiting ${timeoutSeconds}s for container to become healthy.`
             ))
@@ -240,15 +240,15 @@ export class MlDockClient extends MlDockClientBase {
 
         if (err) {
           finished = true
-          stream.removeAllListeners()
+          stream && stream.removeAllListeners()
           rej(err)
         }
         else {
-          stream.once('data', (evt) => {
+          stream!.once('data', (evt) => {
             const status = JSON.parse(evt.toString()).status
             if (status.match(/healthy/)) {
               finished = true
-              stream.removeAllListeners()
+              stream!.removeAllListeners()
               res(container)
             }
           })

@@ -45,7 +45,7 @@ export const defaultFollower: ProgressFollower = (
 function getProgressFollower(progressFollower?: ProgressFollower) {
   return progressFollower =
       progressFollower || /* istanbul ignore next */
-      ((_: string) => {})
+      ((_?: string) => {})
 }
 
 export class MlDock extends EventEmitter {
