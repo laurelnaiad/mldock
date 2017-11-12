@@ -19,9 +19,8 @@ before_install:
 - node --version
 
 script:
-- yarn --no-lockfile
-- yarn test
-- yarn dist
+- npm test
+- npm run dist
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
@@ -32,12 +31,11 @@ node_js:
 env:
 - NODE_VERSION=6.5    MARKLOGIC_VERSION=8.0-1     DOCKER_VERSION=17.06.0~ce-0~ubuntu
 - NODE_VERSION=7      MARKLOGIC_VERSION=8.0-6.4   DOCKER_VERSION=17.06.1~ce-0~ubuntu
-- NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.06.1~ce-0~ubuntu
+- NODE_VERSION=7      MARKLOGIC_VERSION=9.0-1     DOCKER_VERSION=17.06.1~ce-0~ubuntu
 - NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.07.0~ce-0~ubuntu
 - NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.09.0~ce-0~ubuntu
 
 before_deploy:
-- npm pack dist
 - cd dist
 
 deploy:
