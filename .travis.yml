@@ -15,6 +15,8 @@ before_install:
 - sudo apt-get update
 - sudo apt-get -y install docker-ce=$DOCKER_VERSION
 - openssl aes-256-cbc -K $encrypted_1fd173b91261_key -iv $encrypted_1fd173b91261_iv -in ci/build_args.encrypted -out ci/build_args -d
+- nvm install $NODE_VERSION
+- node --version
 
 script:
 - yarn --no-lockfile
@@ -26,12 +28,13 @@ after_success:
 
 node_js:
 - '6.5'
-- '7'
+
 env:
-- MARKLOGIC_VERSION=8.0-1     DOCKER_VERSION=17.06.0~ce-0~ubuntu
-- MARKLOGIC_VERSION=8.0-6.4   DOCKER_VERSION=17.06.1~ce-0~ubuntu
-- MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.06.1~ce-0~ubuntu
-- MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.09.0~ce-0~ubuntu
+- NODE_VERSION=6.5    MARKLOGIC_VERSION=8.0-1     DOCKER_VERSION=17.06.0~ce-0~ubuntu
+- NODE_VERSION=7      MARKLOGIC_VERSION=8.0-6.4   DOCKER_VERSION=17.06.1~ce-0~ubuntu
+- NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.06.1~ce-0~ubuntu
+- NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.07.0~ce-0~ubuntu
+- NODE_VERSION=7      MARKLOGIC_VERSION=9.0-2     DOCKER_VERSION=17.09.0~ce-0~ubuntu
 
 before_deploy:
 - npm pack dist
