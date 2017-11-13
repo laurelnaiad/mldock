@@ -32,7 +32,10 @@ function spawnCli(args: string[]): Promise<string> {
       nycPath,
       [ process.execPath, cliPath, ...args ],
       {
-        env: Object.assign({ FORCE_COLOR: true }),
+        env: Object.assign({
+          FORCE_COLOR: true,
+          DOCKER_HOST: process.env.DOCKER_HOST
+        }),
         shell: true,
         detached: true,
         stdio: 'pipe',
