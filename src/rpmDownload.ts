@@ -70,7 +70,7 @@ export function downloadRpm(options: {
     if (bodyObj.status && bodyObj.status !== 'ok') {
       throw new Error(resp.body)
     }
-    cookie = tough.Cookie.parse(resp.headers['set-cookie'][0])!
+    cookie = tough.Cookie.parse(resp.headers['set-cookie']![0])!
     options.progressFollower(undefined, 'getting download uri')
     return new Promise<string>((res, rej) => {
       got('https://developer.marklogic.com/get-download-url', {
