@@ -33,7 +33,7 @@
     "commander": "^2.14.1",
     "dockerode": "^2.5.3",
     "fs-extra": "^5.0.0",
-    "got": "^8.0.0",
+    "got": "^8.0.3",
     "log-update": "^2.3.0",
     "tar-fs": "^1.15.3",
     "through2": "^2.0.3",
