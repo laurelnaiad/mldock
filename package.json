@@ -62,7 +62,7 @@
   "devDependencies": {
     "@types/chai": "^4.0.3",
     "@types/fs-extra": "^5.0.0",
-    "@types/got": "^7.1.2",
+    "@types/got": "^7.1.6",
     "@types/mocha": "^2.2.48",
     "@types/sinon": "^4.0.0",
     "@types/tough-cookie": "^2.3.2",
