@@ -24,9 +24,9 @@ export const sha1: HashMap<string> = {
 }
 
 export class MlVersion {
-  major: number
-  minor: number
-  revision: number
+  major!: number
+  minor!: number
+  revision!: number
   patch?: number
 
   constructor(versionStr: string) {
@@ -62,6 +62,12 @@ export class MlVersion {
             break
         }
       })
+      if (!this.revision) {
+        throw new Error(
+          `Cannot parse version string, did not find a complete version ` +
+          `specified: ${versionStr}`
+        )
+      }
     }
     catch (err) {
       throw new Error(`Cannot parse version string, ${versionStr}. ${err.stack}`)

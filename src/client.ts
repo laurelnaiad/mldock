@@ -244,7 +244,7 @@ export class MlDockClient extends MlDockClientBase {
           rej(err)
         }
         else {
-          stream!.once('data', (evt) => {
+          stream!.once('data', (evt: { status: string }) => {
             const status = JSON.parse(evt.toString()).status
             if (status.match(/healthy/)) {
               finished = true

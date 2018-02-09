@@ -41,11 +41,11 @@ function spawnCli(args: string[]): Promise<string> {
         stdio: 'pipe',
       }
     )
-    cp.stdout.on('data', (data) => {
+    cp.stdout.on('data', (data: any) => {
       const line = data.toString().trim()
       console.log(line)
     })
-    cp.on('exit', (code) => {
+    cp.on('exit', (code: number) => {
       code ? rej(new Error('Process exited with code: ' + code)) : res()
     })
   })
