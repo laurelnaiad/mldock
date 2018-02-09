@@ -39,6 +39,25 @@
     "through2": "^2.0.3",
     "tough-cookie": "^2.3.2"
   },
+  "devDependencies": {
+    "@types/chai": "^4.0.3",
+    "@types/fs-extra": "^5.0.0",
+    "@types/got": "^7.1.6",
+    "@types/mocha": "^2.2.48",
+    "@types/sinon": "^4.0.0",
+    "@types/tough-cookie": "^2.3.2",
+    "chai": "^4.1.1",
+    "codecov": "^3.0.0",
+    "dotenv": "^5.0.0",
+    "mocha": "^5.0.0",
+    "npm-run-all": "^4.1.2",
+    "npm-scripts-info": "^0.3.6",
+    "nyc": "^11.3.0",
+    "shx": "^0.2.2",
+    "sinon": "^4.1.0",
+    "source-map-support": "^0.5.0",
+    "typescript": "^2.7.1"
+  },
   "scripts-info": {
     "info": "list the high-level npm scripts",
     "build": "build src and test to build directory, copy dockerfiles to build directory",
@@ -58,25 +77,6 @@
     "preversion": "npm run test",
     "version": "npm-run-all clean_dist dist",
     "version_patch": "npm version patch"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.0.3",
-    "@types/fs-extra": "^5.0.0",
-    "@types/got": "^7.1.6",
-    "@types/mocha": "^2.2.48",
-    "@types/sinon": "^4.0.0",
-    "@types/tough-cookie": "^2.3.2",
-    "chai": "^4.1.1",
-    "codecov": "^3.0.0",
-    "dotenv": "^4.0.0",
-    "mocha": "^5.0.0",
-    "npm-run-all": "^4.1.2",
-    "npm-scripts-info": "^0.3.6",
-    "nyc": "^11.3.0",
-    "shx": "^0.2.2",
-    "sinon": "^4.1.0",
-    "source-map-support": "^0.5.0",
-    "typescript": "^2.7.1"
   },
   "nyc": {
     "timeout": 10000,
