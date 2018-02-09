@@ -30,7 +30,7 @@
   "dependencies": {
     "@types/dockerode": "^2.4.5",
     "chalk": "^2.1.0",
-    "commander": "^2.11.0",
+    "commander": "^2.14.1",
     "dockerode": "^2.5.3",
     "fs-extra": "^5.0.0",
     "got": "^8.0.0",
