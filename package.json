@@ -54,7 +54,7 @@
     "npm-scripts-info": "^0.3.6",
     "nyc": "^11.4.1",
     "shx": "^0.2.2",
-    "sinon": "^4.2.2",
+    "sinon": "^4.3.0",
     "source-map-support": "^0.5.3",
     "typescript": "^2.7.1"
   },
