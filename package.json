@@ -36,7 +36,7 @@
     "got": "^8.1.0",
     "log-update": "^2.3.0",
     "tar-fs": "^1.15.3",
-    "through2": "^2.0.3",
+    "through2": "^3.0.0",
     "tough-cookie": "^2.3.2"
   },
   "devDependencies": {
