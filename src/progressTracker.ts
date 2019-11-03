@@ -6,7 +6,7 @@ export interface ProgressFollower {
 
 
 /**
- * Massages the stream emitted by doceerode's modem for taking log lines
+ * Massages the stream emitted by dockerode's modem for taking log lines
  * trimmed and one-by-one.
  *
  * Captures the `id` of the entity under processing, if it
@@ -85,9 +85,13 @@ export function progressToLogLines(
       res(id)
     }
 
+    // at some point, docker started using 'data' instead of 'root'. Leaving
+    // both in there seems like a good plan for compat.
+    myListeners.push({ evt: 'data', listener: rootListener })
     myListeners.push({ evt: 'root', listener: rootListener })
     myListeners.push({ evt: 'error', listener: errorListener })
     myListeners.push({ evt: 'end', listener: endListener })
+    parser.on('data', rootListener)
     parser.on('root', rootListener)
     parser.on('error', errorListener)
     parser.on('end', endListener)

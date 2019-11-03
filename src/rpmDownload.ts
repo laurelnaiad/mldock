@@ -26,7 +26,7 @@ export interface DevCreds {
  * and maintain a list of known functional, if not the official shas
  */
 function getHasher(hash: crypto.Hash) {
-  return through2(function (this: any, data: string | Buffer, enc: string, cb: Function) {
+  return through2(function (this: any, data: string | Buffer, enc: BufferEncoding, cb: Function) {
     const buffer = Buffer.isBuffer(data) ?
         data :
         new Buffer(data, enc)

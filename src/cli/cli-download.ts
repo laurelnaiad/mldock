@@ -25,7 +25,7 @@ export function downloadCmd(version: string, options: {
     dir,
     email,
     password,
-    ...myOpts,
+    ...myOpts
   } = options
   return mld.downloadVersion({
     ...myOpts,

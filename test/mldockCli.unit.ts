@@ -51,15 +51,15 @@ function spawnCli(args: string[]): Promise<string> {
   })
 }
 
-function stubDownload(sb: sinon.SinonSandbox, stub: (
-  version?: string | MlVersion,
-  targetDirectory?: string,
-  credentials?: DevCreds,
-  overwriteIfPresent?: boolean,
-  progressFollower?: ProgressFollower
-) => Promise<string>) {
-  return sb.stub(MlDock.prototype, 'downloadVersion').callsFake(stub)
-}
+// function stubDownload(sb: sinon.SinonSandbox, stub: (
+//   version?: string | MlVersion,
+//   targetDirectory?: string,
+//   credentials?: DevCreds,
+//   overwriteIfPresent?: boolean,
+//   progressFollower?: ProgressFollower
+// ) => Promise<string>) {
+//   return sb.stub(MlDock.prototype, 'downloadVersion').callsFake(stub)
+// }
 
 function tagCentos(context: { mldock: MlDock, version: MlVersion }) {
   const mld = context.mldock
@@ -121,7 +121,7 @@ describe('cli', function () {
     let liveContainer: Docker.Container
 
     beforeEach(function () {
-      sandbox = sinon.sandbox.create()
+      sandbox = sinon.createSandbox()
       ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
     })
     afterEach(function () {
@@ -232,7 +232,7 @@ describe('cli', function () {
     let sandbox: sinon.SinonSandbox
     let ehStub: sinon.SinonStub
     beforeEach(function () {
-      sandbox = sinon.sandbox.create()
+      sandbox = sinon.createSandbox()
       ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
     })
     afterEach(function () {
@@ -373,10 +373,10 @@ describe('cli', function () {
         util.speedFactor(this, 8)
 
         const fStub = sandbox.stub(MlDock.prototype, 'runHost').callsFake((options: {
-          version: string,
-          rpmSource: { email: string, password: string},
+          version: string | MlVersion,
+          rpmSource?: string | DevCreds,
           containerName: string,
-        }) => Promise.resolve({ id: '' }))
+        }) => Promise.resolve(<ContainerRuntimeRef>{ id: '' }))
 
         const okParams = [
           path.resolve('build/src/cli/cli-run.js'),
