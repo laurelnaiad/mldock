@@ -43,6 +43,8 @@ deploy:
     edge: true
     on:
       tags: true
+      all_branches: true
+      condition: $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+
     src: dist
     email: laurelnaiad@gmail.com
     api_token:
@@ -51,6 +53,8 @@ deploy:
     edge: true
     on:
       tags: true
+      all_branches: true
+      condition: $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+
     file: dist/**/*
     token:
       secure: aR60Kg7eVZ3z1i5cT5K8vwhvUDVz9iJbOS4htOiPpfCsRUZm+viKeyrrL1/JSAawa2kCTwN7QrdWeBhTbWPt9j5PyB9YVC3Awix0C1y7vDemRMVwEeSMBB+U1LQkSHOVR96DUgeq/KrVC73DEDhX0chSsyXFZH8nnI2QOmimLwu57yXEEPM5QzF017U0W5+Kp6Ub6THvSt0EfHKGJLsTsQJqTJ3mj+cyzNthvBeGk1G2W2x/VttW6oyImCK9hotsy6Hc4JL4Kax0WURGdW3pjbt2M3QSUg7zfRswd4qtNnjghDuNp6DO8vYmNkni+sha6aKhDM0HysGDtFaNwsuz31f55P+giLhadvpnsUEnEdHeOnQ+likNFTOSI4doA0kYtxx1eG0W3EcZ+Dot2M2PSXG/CmN8f3EEXGQyEEYoQmeRYUQdSDqAb/g5S7vnM6SBDYxWaBWPgOeGwfnM5+4toKNgxWWS6xHw1LBxtTFRdxoKWR6ZA2SoDOD5JqXeyIm1ebRsD2UbXopJmoMT32cIyowPgXjhW9/sSafywpFzSPTFb7bHSDhg/2R81CnRyiUmDJ+ii+6oGwxYP3gppY2zPMPUIInR1WxDOJNe1+Ew7tdwfH69egoCfJech5Soo9Pp9yYhWFx4HMetkSW4CG3i6sAc/4YPzAJ6YKCiwpiECGg=
