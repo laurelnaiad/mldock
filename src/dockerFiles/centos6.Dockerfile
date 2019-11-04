@@ -8,8 +8,7 @@ RUN     mkdir -p /var/opt/MarkLogic && \
         yum clean expire-cache && \
         yum -y install bash.x86_64 \
         glibc.i686 glibc.x86_64 gdb.x86_64 libgcc.x86_64 libstdc++.x86_64 cyrus-sasl-lib.x86_64 \
-        redhat-lsb-core.x86_64 redhat-lsb-printing.x86_64 x86_64 \
-        redhat-lsb-graphics.x86_64 redhat-lsb-compat.x86_64 \
+        redhat-lsb-core.x86_64 redhat-lsb-printing.x86_64 \
         initscripts && \
         yum clean all
 
