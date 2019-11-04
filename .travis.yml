@@ -21,7 +21,6 @@ before_install:
 
 script:
 - npm test
-- npm run dist
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
@@ -36,12 +35,14 @@ env:
 - NODE_VERSION=12.13.0  MARKLOGIC_VERSION=10.0-2.1    DOCKER_VERSION=18.06.1~ce~3-0~ubuntu
 
 before_deploy:
+- npm run dist
 - cd $TRAVIS_BUILD_DIR
 - cd dist
 
 deploy:
   - provider: npm
 #    edge: true
+    skip_cleanup: true
     on:
       tags: true
       all_branches: true
@@ -49,7 +50,6 @@ deploy:
       repo: laurelnaiad/mldock
     # src: dist
     email: laurelnaiad@gmail.com
-    skip_cleanup: true
     api_key:
       secure: guurnQHJxBaZS+fe5YKNYXTUHqdDL6BLk4ETPtv7OmzJeVAmwgSMO4adaYR+5RpEEH52Dj8i0fXSz62bZXT0NJD7zv4/HdfM+aZmuGC9l0eOsEg6XyMfYo6tiQRcPX2PUq5fnGciXIji0xMLbuwcNQ+Cp6svoQDKDR4LQjhxCJdG9osWyWcqjfLYxvzUqAJmzgoN/WJRFUYSm+W7K+h9dZ0EKSKgPrVYQqaKtaCSnjMyIuAYjPaDexRT/3lefLnJ9BuYW849YnqNnh2l8R5L9aBqgs6KdQRrcxOww5g00Oa/De2OPbAxQU0yW4dLun+bIDlKZshWDqbFhXarBXvah2fDbLVtx4ePYxz7AkPZGZisDm+upmQRL3JL2NhSATnSxiW11vDIjprU62EP7Cn97mrDMD0M/zZUfzrtoMpR8tKIE2rEs3PXVnnX+zZD3lCjMNJLLXy0IwdckerrBqE1dJsW9/qTLlSg7VezIDRlqKVhV2WuzIUAluGR+em/Aht5S5X3yMIoqQvxJAqx3UckJwsLN09QZs3u2PvdBcae995w3Tui8cfPUaCS5ju90qQxrs4PB9Izb2RWxkHE3Ixgfgn8LM36Wnz+KslNt6xD3fIk6B2ZWEzdwQLJqFhujzVTvwFUZlo/CttqupQdO4MzjpxLrBwFfQ5i2UPa8NR30LY=
   # - provider: releases
