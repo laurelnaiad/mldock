@@ -8,7 +8,7 @@
   "author": "Daphne Maddox <laurelnaiad@gmail.com>",
   "publisher": "laurelnaiad",
   "license": "MIT",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
@@ -24,8 +24,8 @@
     "url": "https://github.com/laurelnaiad/mldock.git"
   },
   "engines": {
-    "npm": ">=5.3.0",
-    "node": ">= 8.6.0"
+    "npm": ">=6.4.1",
+    "node": ">= 10.15.3"
   },
   "dependencies": {
     "@types/dockerode": "^2.5.20",
