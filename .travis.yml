@@ -31,10 +31,9 @@ node_js:
 
 env:
 - NODE_VERSION=8.6      MARKLOGIC_VERSION=8.0-1       DOCKER_VERSION=17.06.0~ce-0~ubuntu
-- NODE_VERSION=8.6      MARKLOGIC_VERSION=8.0-6.4     DOCKER_VERSION=17.06.1~ce-0~ubuntu
-- NODE_VERSION=8.6      MARKLOGIC_VERSION=9.0-1       DOCKER_VERSION=17.06.1~ce-0~ubuntu
-- NODE_VERSION=8.6      MARKLOGIC_VERSION=9.0-2       DOCKER_VERSION=17.09.0~ce-0~ubuntu
+- NODE_VERSION=8.6      MARKLOGIC_VERSION=8.0-6.4     DOCKER_VERSION=17.09.0~ce-0~ubuntu
 - NODE_VERSION=10.15.3  MARKLOGIC_VERSION=9.0-4       DOCKER_VERSION=18.06.1~ce~3-0~ubuntu
+- NODE_VERSION=12.13.0  MARKLOGIC_VERSION=10.0.2.1    DOCKER_VERSION=18.06.1~ce~3-0~ubuntu
 
 before_deploy:
 - cd $TRAVIS_BUILD_DIR
@@ -46,7 +45,7 @@ deploy:
     on:
       tags: true
       all_branches: true
-      condition: $NODE_VERSION = 10.15.3 && $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+
+      condition: $NODE_VERSION = 12.13.0 && $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+
       repo: laurelnaiad/mldock
     # src: dist
     email: laurelnaiad@gmail.com
