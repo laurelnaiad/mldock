@@ -44,6 +44,7 @@ env:
 # this good
 - NODE_VERSION=10.15.3  MARKLOGIC_VERSION=8.0-1       DOCKER_VERSION=17.06.0~ce-0~ubuntu
 - NODE_VERSION=10       MARKLOGIC_VERSION=8.0-6.4     DOCKER_VERSION=17.09.0~ce-0~ubuntu
+# node 12.13.0 keys the deployment – do not remove unless also modifying deployment condition
 - NODE_VERSION=12.13.0  MARKLOGIC_VERSION=9.0-4       DOCKER_VERSION=18.06.1~ce~3-0~ubuntu
 - NODE_VERSION=12       MARKLOGIC_VERSION=10.0-2.1    DOCKER_VERSION=18.06.1~ce~3-0~ubuntu
 
