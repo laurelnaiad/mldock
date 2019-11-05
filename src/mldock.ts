@@ -220,7 +220,7 @@ export class MlDock extends EventEmitter {
         else {
           throw new Error(
             `An image for MarkLogic ${version.toString()} is not present, and ` +
-            `an \`rpmSource\` was not given`
+            `neither an \`rpmSource\` nor dev credentials were given.`
           )
         }
       }
