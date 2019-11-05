@@ -115,7 +115,7 @@ describe('MlDock class', function () {
   })
 
   it('downloads and builds MarkLgic image in the docker host', function () {
-    util.speedFactor(this, 987)
+    util.speedFactor(this, 1597)
 
     return testInstall(
       util.getContext().mldock,

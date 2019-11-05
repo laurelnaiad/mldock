@@ -136,7 +136,7 @@ describe('cli', function () {
     })
 
     it('builds MarkLogic image from a local rpm file in the docker host', function () {
-      util.speedFactor(this, 987)
+      util.speedFactor(this, 1597)
 
       const downloadArgs = [
         'download',
