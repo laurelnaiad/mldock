@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as fsx from 'fs-extra'
-import * as Docker from 'dockerode'
+import Docker = require('dockerode')
 import { Writable } from 'stream'
 import { MlVersion } from './version'
 const logUpdate = require('log-update')
