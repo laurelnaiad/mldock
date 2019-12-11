@@ -21,7 +21,7 @@ It does very little beyond that, but to allow for substitution of fancier baseli
 ## Installation
 
 Prerequisites:
-* NodeJS 6.5+
+* NodeJS 10.15.3+
 * Docker Engine 17.06+
 * a free [MarkLogic Developer Account](https://developer.marklogic.com/people/signup)
 
