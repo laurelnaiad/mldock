@@ -5,6 +5,8 @@ Vagrantfile
 npm-debug.log
 yarn-error.log
 
+*.scratch.*
+
 build
 coverage
 dist
