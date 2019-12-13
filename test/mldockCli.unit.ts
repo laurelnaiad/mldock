@@ -117,7 +117,7 @@ describe('cli', function () {
 
   describe('download/build', function () {
     let sandbox: sinon.SinonSandbox
-    let ehStub: sinon.SinonStub
+    let ehStub: sinon.SinonStub<[Error], void>
     let liveContainer: Docker.Container
 
     beforeEach(function () {
@@ -230,7 +230,7 @@ describe('cli', function () {
 
   describe('params parsing', function () {
     let sandbox: sinon.SinonSandbox
-    let ehStub: sinon.SinonStub
+    let ehStub: sinon.SinonStub<[Error],void>
     beforeEach(function () {
       sandbox = sinon.createSandbox()
       ehStub = errorHandlerStub(sandbox, (err: Error) => { throw err })
