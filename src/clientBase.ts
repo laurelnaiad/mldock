@@ -74,6 +74,9 @@ export class MlDockClientBase extends Docker {
         [`${this.libOptions.domain}.repo`]: this.libOptions.repo,
       },
     }
+    if (options.containerName) {
+      options.progressFollower('Recreating host container: ' + options.containerName)
+    }
     return (options.containerName ?
       this.wipeMarkLogicContainer(options.containerName, options.progressFollower) :
       Promise.resolve()
@@ -114,7 +117,7 @@ export class MlDockClientBase extends Docker {
     buildargs: HashMap<string| undefined>,
     progressFollower: ProgressFollower
   }): Promise<DockerResourceId> {
-    options.progressFollower('preparing ' + options.friendlyReference)
+    options.progressFollower('Preparing ' + options.friendlyReference)
     fsx.mkdirpSync(options.contextPath)
     const ignoredFiles = this.getIngoredFiles(
       options.contextPath,
@@ -130,7 +133,7 @@ export class MlDockClientBase extends Docker {
     if (options.version) {
       labels[`${this.libOptions.domain}.version`] = options.version.toDotString()
     }
-    options.progressFollower('building ' + options.friendlyReference)
+    options.progressFollower('Building ' + options.friendlyReference)
     return this.buildImage(tarred, {
       t: options.imageName,
       buildargs: options.buildargs,
@@ -143,7 +146,7 @@ export class MlDockClientBase extends Docker {
     id: string,
     progressFollower: ProgressFollower
   ) {
-    progressFollower(`removing container ${id}`)
+    progressFollower(`Removing container ${id}`)
     return this.hostInspect(id)
     .then((ctRtRef) => {
       if (ctRtRef) {
@@ -167,7 +170,7 @@ export class MlDockClientBase extends Docker {
     id: string,
     progressFollower: ProgressFollower
   ): Promise<any> {
-    progressFollower(`removing image ${id}`)
+    progressFollower(`Removing image ${id}`)
     const img = this.getImage(id)
     return img.remove()
     .then(() => progressFollower(undefined))

@@ -50,9 +50,9 @@ export function downloadRpm(options: {
     asset: options.version.downloadUrl
   }
   options.progressFollower(
-    `downloading version ${options.version.toString()} to ${options.targetDir}  `
+    `Downloading version ${options.version.toString()} to ${options.targetDir}  `
   )
-  options.progressFollower(undefined, 'logging in')
+  options.progressFollower(undefined, 'Logging in')
 
   const hash = crypto.createHash('sha1')
   let cookie: tough.Cookie
@@ -71,7 +71,7 @@ export function downloadRpm(options: {
       throw new Error(resp.body)
     }
     cookie = tough.Cookie.parse(resp.headers['set-cookie']![0])!
-    options.progressFollower(undefined, 'getting download uri')
+    options.progressFollower(undefined, 'Getting download uri')
     return new Promise<string>((res, rej) => {
       got('https://developer.marklogic.com/get-download-url', {
         method: 'post',
