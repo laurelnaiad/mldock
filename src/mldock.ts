@@ -365,7 +365,9 @@ export class MlDock extends EventEmitter {
   startHost(
     id: string,
   ): Promise<Docker.Container> {
-    return this.client.getContainer(id).start()
+    const ct = this.client.getContainer(id)
+    return ct.start()
+    .then(() => ct)
   }
 
   /**

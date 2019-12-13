@@ -214,15 +214,16 @@ export class MlDockClient extends MlDockClientBase {
     .then(() => progressFollower(undefined))
   }
 
-  startHealthy(
-    startFunc: () => any,
-    container: Docker.Container,
+  private pollEvents(
+    from: Date,
     timeoutSeconds: number,
-    progressFollower: ProgressFollower
-  ): Promise<Docker.Container> {
+    container: string,
+  ) {
     return new Promise((res, rej) => {
       this.getEvents({
-        container: container.id,
+        since: from.getTime() / 1000,
+        until: (new Date().getTime() / 1000) + timeoutSeconds,
+        container,
         filters: {
           'event': [ 'health_status' ]
         }
@@ -254,8 +255,41 @@ export class MlDockClient extends MlDockClientBase {
           })
         }
       })
-      startFunc()
     })
+  }
 
+  startHealthy(
+    startFunc: () => any,
+    container: Docker.Container,
+    timeoutSeconds: number,
+    progressFollower: ProgressFollower
+  ): Promise<Docker.Container> {
+    const start = new Date()
+    const startNum = start.getTime() / 1000
+    let elapsed = 0
+    startFunc()
+    return new Promise((res, rej) => {
+      const loop = () => {
+        this.pollEvents(start, 1, container.id)
+        .then(
+          () => res(),
+          (err: Error) => {
+            if (err.toString().match(/Timed out/)) {
+              const endNum = (new Date()).getTime() / 1000
+              if (endNum - startNum > timeoutSeconds + 1) {
+                rej(err)
+              }
+              else {
+                loop()
+              }
+            }
+            else {
+              rej(err)
+            }
+          }
+        )
+      }
+      loop()
+    })
   }
 }
