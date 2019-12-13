@@ -1,6 +1,6 @@
 {
   "name": "mldock",
-  "description": "Downloads MarkLogic rpms and build docker images hosting MarkLogic Server 8+ – NodeJS/TypeScript library/CLI.",
+  "description": "Downloads MarkLogic rpms and builds docker images hosting MarkLogic Server 8+ – NodeJS/TypeScript library/CLI.",
   "keywords": [
     "marklogic",
     "docker"
