@@ -2,7 +2,7 @@ import * as crypto from 'crypto'
 import * as path from 'path'
 import * as fsx from 'fs-extra'
 import { createWriteStream } from 'fs'
-import * as got from 'got'
+import got from 'got'
 import * as tough from 'tough-cookie'
 const through2 = require('through2')
 
@@ -59,8 +59,8 @@ export function downloadRpm(options: {
   return got('https://developer.marklogic.com/login', {
     method: 'post',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    form: true,
-    body: form
+    form: form,
+    // json: form
   }).then((resp) => {
     /* istanbul ignore next */
     if (resp.statusCode && resp.statusCode > 299) {
@@ -79,8 +79,7 @@ export function downloadRpm(options: {
           'content-type': 'application/x-www-form-urlencoded',
           'cookie': cookie.cookieString()
         },
-        form: true,
-        body: { download: options.version.downloadUrl },
+        form: { download: options.version.downloadUrl },
       })
       .then((resp) => {
         /* istanbul ignore next */
@@ -102,8 +101,7 @@ export function downloadRpm(options: {
             'cookie': cookie.cookieString(),
             'content-type': 'application/json'
           },
-          form: true,
-          body: { download: options.version.downloadUrl },
+          form: { download: options.version.downloadUrl },
         })
         .on('downloadProgress', (state: { percent: number }) => {
           const now = new Date()
