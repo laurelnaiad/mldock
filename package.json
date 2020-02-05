@@ -32,7 +32,7 @@
     "@types/dockerode": "^2.5.20",
     "chalk": "^3.0.0",
     "commander": "^4.0.0",
-    "dockerode": "^3.0.2",
+    "dockerode": "3.0.2",
     "fs-extra": "^8.1.0",
     "got": "^10.0.4",
     "log-update": "^3.3.0",
