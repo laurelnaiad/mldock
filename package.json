@@ -41,7 +41,7 @@
     "tough-cookie": "^3.0.1"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.4",
+    "@types/chai": "^4.2.9",
     "@types/fs-extra": "^8.0.1",
     "@types/got": "^9.6.8",
     "@types/mocha": "^5.2.7",
