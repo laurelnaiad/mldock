@@ -34,7 +34,7 @@
     "commander": "^4.0.0",
     "dockerode": "^3.0.2",
     "fs-extra": "^8.1.0",
-    "got": "^10.0.4",
+    "got": "^10.7.0",
     "log-update": "^3.3.0",
     "tar-fs": "^2.0.0",
     "through2": "^3.0.1",
