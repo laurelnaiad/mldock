@@ -29,7 +29,7 @@
     "node": ">= 10.15.3"
   },
   "dependencies": {
-    "@types/dockerode": "^2.5.20",
+    "@types/dockerode": "^2.5.28",
     "chalk": "^3.0.0",
     "commander": "^4.0.0",
     "dockerode": "^3.0.2",
